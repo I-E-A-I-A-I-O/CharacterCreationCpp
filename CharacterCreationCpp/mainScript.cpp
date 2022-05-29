@@ -11,15 +11,24 @@
 #include "blip.h"
 
 int GlobalData::PLAYER_ID;
+bool GlobalData::swapped = false;
 bool transisioning = false;
 bool entering = false;
 Hash to_model = 0x705E61F2;
+Hash playerzero = 0xD7114C9;
+Hash playerone = 0x9B22DBAF;
+Hash playertwo = 0x9B810FA2;
 //Cam creation_camera;
 Blip creation_blip;
 Blip outfit_blip;
 
 bool is_main_character() {
 	return PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0xD7114C9) || PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0x9B22DBAF) || PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0x9B810FA2);
+}
+
+bool is_main_character_2() {
+	Hash player_model = ENTITY::GET_ENTITY_MODEL(GlobalData::PLAYER_ID);
+	return player_model == playerzero || player_model == playerone || player_model == playertwo;
 }
 
 void lock_player() {
@@ -86,12 +95,10 @@ void handle_loading_menu_opening() {
 
 void handle_outfitmenu_open() {
 	if (!UTILS::can_open_outfitmenu()) {
-
 		/*if (OUTFITMENU::isOpen()) {
 			unlock_player();
 			OUTFITMENU::close();
 		}*/
-
 		return;
 	}
 
@@ -132,6 +139,7 @@ void creation_tick() {
 		CAM::RENDER_SCRIPT_CAMS(1, 1, 3000, 0, 0, 0);*/
 		CAM::DO_SCREEN_FADE_IN(2000);
 		transisioning = false;
+		GlobalData::swapped = true;
 		CHARACTERMENU::Data::creating = true;
 		CHARACTERMENU::open();
 	}
@@ -166,6 +174,10 @@ void outfit_tick() {
 			OUTFITMENU::Data::creating = false;
 		}
 	}
+}
+
+void model_watch_tick() {
+
 }
 
 int main() {

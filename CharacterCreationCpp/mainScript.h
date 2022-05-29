@@ -2,6 +2,7 @@
 
 struct GlobalData {
 	static int PLAYER_ID;
+	static bool swapped;
 };
 
 void MainScriptMain();

@@ -11,6 +11,7 @@
 
 NativeMenu::Menu lmenu;
 std::vector<std::string> saved_characters;
+std::vector<std::string> saved_outfits;
 
 void OnLoadingMain() {
 	lmenu.ReadSettings();
@@ -53,6 +54,159 @@ void load_characters() {
 	}
 }
 
+void load_outfits() {
+	saved_outfits = std::vector<std::string>();
+	std::string path = "CharacterCreationData\\Outfits";
+
+	for (const auto& entry : std::filesystem::directory_iterator(path)) {
+		if (entry.is_regular_file()) {
+			std::string filename = entry.path().filename().string();
+			int index = filename.find_last_of(".");
+			std::string name = filename.substr(0, index);
+			saved_outfits.push_back(name);
+		}
+	}
+}
+
+void load_outfit(const std::string& outfit_name) {
+	nlohmann::json j;
+	std::string filepath = "CharacterCreationData\\Outfits\\";
+	filepath = filepath.append(outfit_name).append(".json");
+	std::ifstream i(filepath);
+	i >> j;
+	i.close();
+	int selected_hairstyle = j["hair"]["style"];
+	int selected_haircolor = j["hair"]["color"];
+	int selected_highlight = j["hair"]["highlight"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, selected_hairstyle, 0, 0);
+	PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, selected_haircolor, selected_highlight);
+	bool has_blush = j["blush"]["enabled"];
+
+	if (has_blush) {
+		int selected_blush_type = j["blush"]["type"];
+		int selected_blush_color = j["blush"]["color"];
+		float selected_blush_opacity = j["blush"]["opacity"];
+		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, selected_blush_type, selected_blush_opacity);
+		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, selected_blush_color, selected_blush_color);
+	}
+	else {
+		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, 255, 1);
+	}
+
+	bool has_lipstick = j["lipstick"]["enabled"];
+
+	if (has_lipstick) {
+		int selected_lipstick_type = j["lipstick"]["type"];
+		int selected_lipstick_color = j["lipstick"]["color"];
+		float selected_lipstick_opacity = j["lipstick"]["opacity"];
+		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, selected_lipstick_type, selected_lipstick_opacity);
+		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, selected_lipstick_color, selected_lipstick_color);
+	}
+	else {
+		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, 255, 1);
+	}
+
+	bool has_makeup = j["makeup"]["enabled"];
+
+	if (has_makeup) {
+		int selected_makeup_type = j["makeup"]["type"];
+		int selected_makeup_color = j["makeup"]["color"];
+		float selected_makeup_opacity = j["makeup"]["opacity"];
+		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, selected_makeup_type, selected_makeup_opacity);
+		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, selected_makeup_color, selected_makeup_color);
+	}
+	else {
+		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, 255, 1);
+	}
+
+	int mask_drawable = j["mask"]["drawable"];
+	int mask_texture = j["mask"]["texture"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 1, mask_drawable, mask_texture, 0);
+	int leg_drawable = j["leg"]["drawable"];
+	int leg_texture = j["leg"]["texture"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 4, leg_drawable, leg_texture, 0);
+	int bag_drawable = j["bag"]["drawable"];
+	int bag_texture = j["bag"]["texture"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 5, bag_drawable, bag_texture, 0);
+	int shoe_drawable = j["shoe"]["drawable"];
+	int shoe_texture = j["shoe"]["texture"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 6, shoe_drawable, shoe_texture, 0);
+	int accessory_drawable = j["accessory"]["drawable"];
+	int accessory_texture = j["accessory"]["texture"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 7, accessory_drawable, accessory_texture, 0);
+	int undershirt_drawable = j["undershirt"]["drawable"];
+	int undershirt_texture = j["undershirt"]["texture"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 8, undershirt_drawable, undershirt_texture, 0);
+	int armor_drawable = j["armor"]["drawable"];
+	int armor_texture = j["armor"]["texture"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 9, armor_drawable, armor_texture, 0);
+	int torso2_drawable = j["torso2"]["drawable"];
+	int torso2_texture = j["torso2"]["texture"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 11, torso2_drawable, torso2_texture, 0);
+	int torso_drawable = j["torso"]["drawable"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 3, torso_drawable, 0, 0);
+	int eyecolor = j["eyecolor"];
+	PED::SET_PED_EYE_COLOR_(GlobalData::PLAYER_ID, eyecolor);
+	int badge_drawable = j["badge"];
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 10, badge_drawable, 0, 0);
+	bool has_hat = j["hat"]["enabled"];
+
+	if (has_hat) {
+		int hat_drawable = j["hat"]["drawable"];
+		int hat_texture = j["hat"]["texture"];
+		PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 0, hat_drawable, hat_texture, 1);
+	}
+	else {
+		PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 0);
+	}
+
+	bool has_glasses = j["glasses"]["enabled"];
+
+	if (has_glasses) {
+		int glasses_drawable = j["glasses"]["drawable"];
+		int glasses_texture = j["glasses"]["texture"];
+		PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 1, glasses_drawable, glasses_texture, 1);
+	}
+	else {
+		PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 1);
+	}
+
+	bool has_ear = j["ear"]["enabled"];
+
+	if (has_ear) {
+		int ear_drawable = j["ear"]["drawable"];
+		int ear_texture = j["ear"]["texture"];
+		PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 2, ear_drawable, ear_texture, 1);
+	}
+	else {
+		PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 2);
+	}
+
+	bool has_watch = j["watch"]["enabled"];
+
+	if (has_watch) {
+		int watch_drawable = j["watch"]["drawable"];
+		int watch_texture = j["watch"]["texture"];
+		PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 6, watch_drawable, watch_texture, 1);
+	}
+	else {
+		PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 6);
+	}
+
+	bool has_bracelet = j["bracelet"]["enabled"];
+
+	if (has_bracelet) {
+		int bracelet_drawable = j["bracelet"]["drawable"];
+		int bracelet_texture = j["bracelet"]["texture"];
+		PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 7, bracelet_drawable, bracelet_texture, 1);
+	}
+	else {
+		PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 7);
+	}
+
+	SCREEN::ShowNotification("~g~Outfit loaded!");
+}
+
 void load_character(const std::string& character_name) {
 	CAM::DO_SCREEN_FADE_OUT(2000);
 	WAIT(4000);
@@ -67,6 +221,7 @@ void load_character(const std::string& character_name) {
 	PLAYER::SET_PLAYER_MODEL(0, model);
 	UTILS::unloadModel(model);
 	GlobalData::PLAYER_ID = PLAYER::PLAYER_PED_ID();
+	GlobalData::swapped = true;
 	int shape_mother = j["features"]["shape_mother"];
 	int shape_father = j["features"]["shape_father"];
 	int skin_mother = j["features"]["skin_mother"];
@@ -224,7 +379,9 @@ void update_loadingmenu() {
 		load_characters();
 	}
 
-	lmenu.MenuOption("Outfits", "outfits", { "Load saved outfits." });
+	if (lmenu.MenuOption("Outfits", "outfits", { "Load saved outfits." })) {
+		load_outfits();
+	}
 }
 
 void update_characters() {
@@ -242,6 +399,11 @@ void update_outfits() {
 	lmenu.Title("Outfits");
 	lmenu.Subtitle("Load saved outfits.");
 
+	for (const auto& entry : saved_outfits) {
+		if (lmenu.Option(entry, { "Load this outfit" })) {
+			load_outfit(entry);
+		}
+	}
 }
 
 void LOADINGMENU::OnTick() {

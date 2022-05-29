@@ -605,6 +605,7 @@ void save_outfit() {
 	std::string filepath = "CharacterCreationData\\Outfits\\";
 	filepath = filepath.append(name) + ".json";
 	nlohmann::json j;
+	j["eyecolor"] = eye_color;
 	j["hair"]["style"] = outfit_selected_hairstyle;
 	j["hair"]["color"] = outfit_selected_haircolor;
 	j["hair"]["highlight"] = outfit_selected_highlight;
@@ -652,6 +653,7 @@ void save_outfit() {
 	j["bracelet"]["enabled"] = has_bracelet;
 	j["bracelet"]["drawable"] = bracelet_type;
 	j["bracelet"]["texture"] = bracelet_color;
+	j["badge"] = badge_drawable;
 	std::ofstream o(filepath);
 	o << std::setw(4) << j << std::endl;
 	SCREEN::ShowNotification("~g~Outfit saved!");
