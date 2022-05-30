@@ -12,6 +12,8 @@
 NativeMenu::Menu lmenu;
 std::vector<std::string> saved_characters;
 std::vector<std::string> saved_outfits;
+bool LOADINGMENU::Data::loaded = false;
+std::string LOADINGMENU::Data::last_loaded = "";
 
 void OnLoadingMain() {
 	lmenu.ReadSettings();
@@ -68,7 +70,9 @@ void load_outfits() {
 	}
 }
 
-void load_outfit(const std::string& outfit_name) {
+void LOADINGMENU::load_outfit(const std::string& outfit_name) {
+	Data::loaded = true;
+	Data::last_loaded = outfit_name;
 	nlohmann::json j;
 	std::string filepath = "CharacterCreationData\\Outfits\\";
 	filepath = filepath.append(outfit_name).append(".json");
@@ -401,7 +405,7 @@ void update_outfits() {
 
 	for (const auto& entry : saved_outfits) {
 		if (lmenu.Option(entry, { "Load this outfit" })) {
-			load_outfit(entry);
+			LOADINGMENU::load_outfit(entry);
 		}
 	}
 }

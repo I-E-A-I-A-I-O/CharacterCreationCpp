@@ -14,6 +14,7 @@ int GlobalData::PLAYER_ID;
 bool GlobalData::swapped = false;
 bool transisioning = false;
 bool entering = false;
+bool died = false;
 Hash to_model = 0x705E61F2;
 Hash playerzero = 0xD7114C9;
 Hash playerone = 0x9B22DBAF;
@@ -29,6 +30,10 @@ bool is_main_character() {
 bool is_main_character_2() {
 	Hash player_model = ENTITY::GET_ENTITY_MODEL(GlobalData::PLAYER_ID);
 	return player_model == playerzero || player_model == playerone || player_model == playertwo;
+}
+
+bool is_freemode_character() {
+	return PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0x9C9EFFD8) || PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0x705E61F2);
 }
 
 void lock_player() {
@@ -177,7 +182,32 @@ void outfit_tick() {
 }
 
 void model_watch_tick() {
+	if (GlobalData::swapped) {
+		if (!is_freemode_character()) {
+			GlobalData::swapped = false;
+			LOADINGMENU::Data::loaded = false;
+			return;
+		}
 
+		if (ENTITY::IS_ENTITY_DEAD(GlobalData::PLAYER_ID, 1)) {
+			if (!is_main_character_2()) {
+				UTILS::loadModel(playerzero);
+				WAIT(2000);
+				PLAYER::SET_PLAYER_MODEL(0, playerzero);
+				UTILS::unloadModel(playerzero);
+				GlobalData::PLAYER_ID = PLAYER::PLAYER_PED_ID();
+				PED::SET_PED_DEFAULT_COMPONENT_VARIATION(GlobalData::PLAYER_ID);
+				GlobalData::swapped = false;
+				LOADINGMENU::Data::loaded = false;
+			}
+			else died = true;
+		}
+		else if (died) {
+			while (CAM::IS_SCREEN_FADED_OUT() || CAM::IS_SCREEN_FADING_OUT() || !CAM::IS_GAMEPLAY_CAM_RENDERING()) WAIT(0);
+			LOADINGMENU::load_outfit(LOADINGMENU::Data::last_loaded);
+			died = false;
+		}
+	}
 }
 
 int main() {
@@ -189,6 +219,7 @@ int main() {
 
 	for (;;) {
 		GlobalData::PLAYER_ID = PLAYER::PLAYER_PED_ID();
+		model_watch_tick();
 		LOADINGMENU::OnTick();
 		CHARACTERMENU::OnTick();
 		OUTFITMENU::OnTick();
