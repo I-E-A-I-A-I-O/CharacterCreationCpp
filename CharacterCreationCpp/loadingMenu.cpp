@@ -14,6 +14,11 @@ std::vector<std::string> saved_characters;
 std::vector<std::string> saved_outfits;
 bool LOADINGMENU::Data::loaded = false;
 std::string LOADINGMENU::Data::last_loaded = "";
+typedef struct {
+	int shapeFirst, shapeSecond, shapeThird;
+	int skinFirst, skinSecond, skinThird;
+	int shapeMix, skinMix, thirdMix;
+} headBlendData;
 
 void OnLoadingMain() {
 	lmenu.ReadSettings();
@@ -375,6 +380,33 @@ void load_character(const std::string& character_name) {
 	SCREEN::ShowNotification("~g~Character loaded!");
 }
 
+void save_current_character() {
+	MISC::DISPLAY_ONSCREEN_KEYBOARD(1, "FMMC_KEY_TIP9", nullptr, "Name", nullptr, nullptr, nullptr, 21);
+
+	while (MISC::UPDATE_ONSCREEN_KEYBOARD() == 0) WAIT(0);
+
+	const char* name = MISC::GET_ONSCREEN_KEYBOARD_RESULT();
+	std::string filepath = "CharacterCreationData\\Characters\\";
+	filepath = filepath.append(name) + ".json";
+	nlohmann::json j;
+	j["model"] = ENTITY::GET_ENTITY_MODEL(GlobalData::PLAYER_ID);
+	headBlendData headData = headBlendData();
+	PED::GET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, (Any*) &headData);
+}
+
+void update_charmenu() {
+	lmenu.Title("Current Character");
+	lmenu.Subtitle("Save your current character and outfit");
+
+	if (lmenu.Option("Save character")) {
+		save_current_character();
+	}
+
+	if (lmenu.Option("Save outfit")) {
+
+	}
+}
+
 void update_loadingmenu() {
 	lmenu.Title("Character Creation");
 	lmenu.Subtitle("Load saved characters & outfits.");
@@ -386,6 +418,8 @@ void update_loadingmenu() {
 	if (lmenu.MenuOption("Outfits", "outfits", { "Load saved outfits." })) {
 		load_outfits();
 	}
+
+	//lmenu.MenuOption("Current character", "charmenu", { "Save your current character and outfit." });
 }
 
 void update_characters() {
@@ -422,6 +456,9 @@ void LOADINGMENU::OnTick() {
 	else if (lmenu.CurrentMenu("outfits")) {
 		update_outfits();
 	}
+	/*else if (lmenu.CurrentMenu("charmenu")) {
+		update_charmenu();
+	}*/
 
 	lmenu.EndMenu();
 }

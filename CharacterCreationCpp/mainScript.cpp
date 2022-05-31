@@ -99,7 +99,7 @@ void handle_loading_menu_opening() {
 }
 
 void handle_outfitmenu_open() {
-	if (!UTILS::can_open_outfitmenu()) {
+	if (!UTILS::can_open_outfitmenu() || !is_freemode_character()) {
 		/*if (OUTFITMENU::isOpen()) {
 			unlock_player();
 			OUTFITMENU::close();
@@ -145,6 +145,9 @@ void creation_tick() {
 		CAM::DO_SCREEN_FADE_IN(2000);
 		transisioning = false;
 		GlobalData::swapped = true;
+
+		if (LOADINGMENU::Data::loaded) LOADINGMENU::Data::loaded = false;
+
 		CHARACTERMENU::Data::creating = true;
 		CHARACTERMENU::open();
 	}
@@ -160,6 +163,9 @@ void outfit_tick() {
 		CAM::DO_SCREEN_FADE_OUT(2000);
 		WAIT(4000);
 		ENTITY::SET_ENTITY_COORDS(GlobalData::PLAYER_ID, -1188.65857f, -765.6327f, 16.3201351f, 1, 0, 0, 1);
+		PED::SET_PED_DEFAULT_COMPONENT_VARIATION(GlobalData::PLAYER_ID);
+		PED::CLEAR_ALL_PED_PROPS(GlobalData::PLAYER_ID);
+		PED::SET_PED_EYE_COLOR_(GlobalData::PLAYER_ID, 1);
 		WAIT(2000);
 		CAM::DO_SCREEN_FADE_IN(2000);
 		WAIT(1500);
@@ -197,14 +203,12 @@ void model_watch_tick() {
 				UTILS::unloadModel(playerzero);
 				GlobalData::PLAYER_ID = PLAYER::PLAYER_PED_ID();
 				PED::SET_PED_DEFAULT_COMPONENT_VARIATION(GlobalData::PLAYER_ID);
-				GlobalData::swapped = false;
-				LOADINGMENU::Data::loaded = false;
 			}
 			else died = true;
 		}
 		else if (died) {
 			while (CAM::IS_SCREEN_FADED_OUT() || CAM::IS_SCREEN_FADING_OUT() || !CAM::IS_GAMEPLAY_CAM_RENDERING()) WAIT(0);
-			LOADINGMENU::load_outfit(LOADINGMENU::Data::last_loaded);
+			if (LOADINGMENU::Data::loaded) LOADINGMENU::load_outfit(LOADINGMENU::Data::last_loaded);
 			died = false;
 		}
 	}
@@ -257,5 +261,6 @@ void MainScriptAbort() {
 		WAIT(1500);
 		unlock_player();
 		OUTFITMENU::Data::creating = false;
+		CAM::RENDER_SCRIPT_CAMS(0, 0, 3000, 0, 0, 0);
 	}
 }
