@@ -246,7 +246,7 @@ void shoecam_start() {
 	Hash player_model = ENTITY::GET_ENTITY_MODEL(GlobalData::PLAYER_ID);
 	Vector3 dimensions = Vector3();
 	Vector3 ignore = Vector3();
-	Vector3 cam_offset = Vector3(0.5f, 1.0f, 0.5f);
+	Vector3 cam_offset = Vector3(0.5f, 1.0f, 0.8f);
 	Vector3 bone_coords = PED::GET_PED_BONE_COORDS(GlobalData::PLAYER_ID, eBone::SKEL_Pelvis, cam_offset);
 	Vector3 cam_look_coords = Vector3();
 	MISC::GET_MODEL_DIMENSIONS(player_model, &dimensions, &ignore);
@@ -255,7 +255,7 @@ void shoecam_start() {
 	Vector3 rear_position = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(GlobalData::PLAYER_ID, dimensions);
 	cam_look_coords.x = rear_position.x;
 	cam_look_coords.y = rear_position.y;
-	cam_look_coords.z = rear_position.z - 0.5f;
+	cam_look_coords.z = rear_position.z - 0.8f;
 	CAM::SET_CAM_COORD(shoe_cam, bone_coords);
 	CAM::POINT_CAM_AT_COORD(shoe_cam, cam_look_coords);
 	CAM::SET_CAM_ACTIVE(shoe_cam, true);
@@ -278,14 +278,14 @@ void set_outfit_hair_values() {
 void set_outfit_max_drawables() {
 	max_mask_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 1);
 	max_torso_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 3) - 1;
-	max_leg_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 4) - 1;
+	max_leg_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 4) - 2;
 	max_bag_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 5) - 1;
 	max_shoe_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 6) - 1;
 	max_accessory_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 7) - 1;
-	max_undershirt_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 8) - 1;
+	max_undershirt_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 8) - 2;
 	max_armor_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 9) - 1;
 	max_badge_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 10) - 1;
-	max_torso2_drawble = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 11) - 1;
+	max_torso2_drawble = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 11) - 2;
 	max_hat_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 0);
 	max_glasses_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 1);
 	max_ear_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 2);

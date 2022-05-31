@@ -9,6 +9,7 @@
 
 bool CHARACTERMENU::Data::creating = false;
 NativeMenu::Menu menu;
+Cam face_camera;
 int selected_hairstyle;
 int selected_haircolor;
 int selected_highlight;
@@ -71,8 +72,10 @@ float chinbone_length;
 float chinbone_width;
 float chinbone_hole;
 float neck_thickness;
+bool face_lock = false;
 
 void OnMain() {
+	face_camera = CAM::CREATE_CAM("DEFAULT_SCRIPTED_CAMERA", 0);
 	menu.ReadSettings();
 	AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"CONFIRM_BEEP", (char*)"HUD_MINI_GAME_SOUNDSET", true);
 }
@@ -143,6 +146,7 @@ void reset_items() {
 }
 
 void OnExit() {
+	CAM::DESTROY_CAM(face_camera, 0);
 	reset_items();
 }
 
@@ -237,6 +241,35 @@ void save_values() {
 	std::ofstream o(filepath);
 	o << std::setw(4) << j << std::endl;
 	SCREEN::ShowNotification("~g~Character saved!");
+}
+
+void facecam_start()
+{
+	Hash player_model = ENTITY::GET_ENTITY_MODEL(GlobalData::PLAYER_ID);
+	Vector3 dimensions = Vector3();
+	Vector3 ignore = Vector3();
+	Vector3 cam_offset = Vector3(0.1f, 0.4f, 0.5f);
+	Vector3 bone_coords = PED::GET_PED_BONE_COORDS(GlobalData::PLAYER_ID, eBone::SKEL_Head, cam_offset);
+	Vector3 cam_look_coords = Vector3();
+	MISC::GET_MODEL_DIMENSIONS(player_model, &dimensions, &ignore);
+	dimensions.x = 0;
+	dimensions.z = 0;
+	Vector3 rear_position = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(GlobalData::PLAYER_ID, dimensions);
+	cam_look_coords.x = rear_position.x;
+	cam_look_coords.y = rear_position.y;
+	cam_look_coords.z = rear_position.z + 0.7f;
+	CAM::SET_CAM_COORD(face_camera, bone_coords);
+	CAM::POINT_CAM_AT_COORD(face_camera, cam_look_coords);
+	CAM::SET_CAM_ACTIVE(face_camera, true);
+	CAM::RENDER_SCRIPT_CAMS(1, 1, 1000, 1, 0, 0);
+}
+
+void facecam_end()
+{
+	if (!CAM::IS_CAM_ACTIVE(face_camera)) return;
+
+	CAM::SET_CAM_ACTIVE(face_camera, false);
+	CAM::RENDER_SCRIPT_CAMS(0, 1, 1000, 1, 0, 0);
 }
 
 void set_hair_values() {
@@ -751,21 +784,65 @@ void update_customization() {
 		set_hair_values();
 	}
 	
-	menu.MenuOption("Eyebrows", "eyebrowmenu", { "Change your eyebrows." });
-	menu.MenuOption("Beard", "beardmenu", { "Change your beard." });
-	menu.MenuOption("Chest Hair", "chestmenu", { "Change your chest hair." });
-	menu.MenuOption("Blush", "blushmenu", { "Change your blush." });
-	menu.MenuOption("Lipstick", "lipstickmenu", { "Change your lipstick." });
-	menu.MenuOption("Blemish", "blemishmenu", { "Change your blemish." });
-	menu.MenuOption("Age", "agemenu", { "Change your age." });
-	menu.MenuOption("Makeup", "makeupmenu", { "Change your makeup." });
-	menu.MenuOption("Complexion", "complexmenu", { "Change your complexion." });
-	menu.MenuOption("Sun Damage", "sunmenu", { "Change your sun damage." });
-	menu.MenuOption("Moles & Freckles", "molesmenu", { "Change your moles and freckles." });
+	if (menu.MenuOption("Eyebrows", "eyebrowmenu", { "Change your eyebrows." })) {
+		facecam_start();
+		face_lock = true;
+	}
+
+	if (menu.MenuOption("Beard", "beardmenu", { "Change your beard." })) {
+		facecam_start();
+		face_lock = true;
+	}
+
+	if (menu.MenuOption("Chest Hair", "chestmenu", { "Change your chest hair." })) {
+		facecam_start();
+		face_lock = true;
+	}
+
+	if (menu.MenuOption("Blush", "blushmenu", { "Change your blush." })) {
+		facecam_start();
+		face_lock = true;
+	}
+
+	if (menu.MenuOption("Lipstick", "lipstickmenu", { "Change your lipstick." })) {
+		facecam_start();
+		face_lock = true;
+	}
+
+	if (menu.MenuOption("Blemish", "blemishmenu", { "Change your blemish." })) {
+		facecam_start();
+		face_lock = true;
+	}
+
+	if (menu.MenuOption("Age", "agemenu", { "Change your age." })) {
+		facecam_start();
+		face_lock = true;
+	}
+
+	if (menu.MenuOption("Makeup", "makeupmenu", { "Change your makeup." })) {
+		facecam_start();
+		face_lock = true;
+	}
+
+	if (menu.MenuOption("Complexion", "complexmenu", { "Change your complexion." })) {
+		facecam_start();
+		face_lock = true;
+	}
+
+	if (menu.MenuOption("Sun Damage", "sunmenu", { "Change your sun damage." })) {
+		facecam_start();
+		face_lock = true;
+	}
+
+	if (menu.MenuOption("Moles & Freckles", "molesmenu", { "Change your moles and freckles." })) {
+		facecam_start();
+		face_lock = true;
+	}
 }
 
 void CHARACTERMENU::OnTick() {
 	menu.CheckKeys();
+	face_lock = false;
 
 	if (menu.CurrentMenu("mainmenu")) {
 		update_mainmenu();
@@ -778,40 +855,53 @@ void CHARACTERMENU::OnTick() {
 	}
 	else if (menu.CurrentMenu("eyebrowmenu")) {
 		update_eyebrowmenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("beardmenu")) {
 		update_beardmenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("chestmenu")) {
 		update_chestmenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("blushmenu")) {
 		update_blushmenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("lipstickmenu")) {
 		update_lipstickmenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("blemishmenu")) {
 		update_blemishmenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("agemenu")) {
 		update_agemenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("makeupmenu")) {
 		update_makeupmenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("complexmenu")) {
 		update_complexmenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("sunmenu")) {
 		update_sunmenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("molesmenu")) {
 		update_molesmenu();
+		face_lock = true;
 	}
 	else if (menu.CurrentMenu("shapemenu")) {
 		update_shapemenu();
 	}
+
+	if (!face_lock) facecam_end();
 
 	menu.EndMenu();
 }
