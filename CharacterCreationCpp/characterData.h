@@ -1,0 +1,55 @@
+#pragma once
+
+typedef struct {
+	int outfit_selected_hairstyle;
+	int outfit_selected_haircolor;
+	int outfit_selected_highlight;
+	bool outfit_has_blush;
+	int outfit_selected_blush_type;
+	int outfit_selected_blush_color;
+	float outfit_selected_blush_opacity;
+	bool outfit_has_lipstick;
+	int outfit_selected_lipstick_type;
+	int outfit_selected_lipstick_color;
+	float outfit_selected_lipstick_opacity;
+	bool outfit_has_makeup;
+	int outfit_selected_makeup_type;
+	int outfit_selected_makeup_color;
+	float outfit_selected_makeup_opacity;
+	int mask_drawable;
+	int mask_texture;
+	int torso_drawable;
+	int leg_drawable;
+	int leg_texture;
+	int bag_drawable;
+	int bag_texture;
+	int shoe_drawable;
+	int shoe_texture;
+	int accessory_drawable;
+	int accessory_texture;
+	int undershirt_drawable;
+	int undershirt_texture;
+	int armor_drawable;
+	int armor_texture;
+	int badge_drawable;
+	int torso2_drawable;
+	int torso2_texture;
+	bool has_hat;
+	int hat_type;
+	int hat_color;
+	bool has_glasses;
+	int glasses_type;
+	int glasses_color;
+	bool has_ear;
+	int ear_type;
+	int ear_color;
+	bool has_watch;
+	int watch_type;
+	int watch_color;
+	bool has_bracelet;
+	int bracelet_type;
+	int bracelet_color;
+	int eye_color;
+} CharacterData;
+
+extern CharacterData current_character;

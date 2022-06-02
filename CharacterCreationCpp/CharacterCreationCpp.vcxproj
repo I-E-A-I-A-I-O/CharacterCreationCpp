@@ -159,6 +159,7 @@
   <ItemGroup>
     <ClInclude Include="blip.h" />
     <ClInclude Include="characterCreationMenu.h" />
+    <ClInclude Include="characterData.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="InstructionalButton.h" />
     <ClInclude Include="loadingMenu.h" />

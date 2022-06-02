@@ -69,6 +69,9 @@
     <ClInclude Include="outfitCreationMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="characterData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

@@ -13,5 +13,8 @@ namespace UTILS {
 	bool isInRange(const Vector3& a, const Vector3& b, const float& range);
 	void loadModel(Hash model);
 	void unloadModel(Hash model);
+	bool is_main_character();
+	bool is_main_character_2();
+	bool is_freemode_character();
 	Vector3 aroundCoords(float distance, Vector3 coords);
 }

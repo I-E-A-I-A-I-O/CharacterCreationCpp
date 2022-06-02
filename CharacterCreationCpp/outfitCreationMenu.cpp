@@ -5,97 +5,18 @@
 #include "mainScript.h"
 #include "json.hpp"
 #include "screen.h"
+#include "characterData.h"
 #include <filesystem>
 #include <fstream>
 #include <vector>
 
 NativeMenu::Menu omenu;
 bool OUTFITMENU::Data::creating = false;
+bool OUTFITMENU::Data::reset = false;
+CharacterData current_character = CharacterData();
 Cam shoe_cam;
 Cam face_cam;
 Cam leg_cam;
-int outfit_selected_hairstyle;
-int outfit_selected_haircolor;
-int outfit_selected_highlight;
-int outfit_max_hairstyles;
-int outfit_max_haircolors;
-bool outfit_has_blush;
-int outfit_selected_blush_type;
-int outfit_selected_blush_color;
-float outfit_selected_blush_opacity;
-bool outfit_has_lipstick;
-int outfit_selected_lipstick_type;
-int outfit_selected_lipstick_color;
-float outfit_selected_lipstick_opacity;
-bool outfit_has_makeup = false;
-int outfit_selected_makeup_type;
-int outfit_selected_makeup_color;
-float outfit_selected_makeup_opacity;
-int mask_drawable;
-int mask_texture;
-int torso_drawable;
-int leg_drawable;
-int leg_texture;
-int bag_drawable;
-int bag_texture;
-int shoe_drawable;
-int shoe_texture;
-int accessory_drawable;
-int accessory_texture;
-int undershirt_drawable;
-int undershirt_texture;
-int armor_drawable;
-int armor_texture;
-int badge_drawable;
-int torso2_drawable;
-int torso2_texture;
-bool has_hat;
-int hat_type;
-int hat_color;
-bool has_glasses;
-int glasses_type;
-int glasses_color;
-bool has_ear;
-int ear_type;
-int ear_color;
-bool has_watch;
-int watch_type;
-int watch_color;
-bool has_bracelet;
-int bracelet_type;
-int bracelet_color;
-int eye_color;
-int max_mask_drawable;
-int max_mask_texture;
-int max_torso_drawable;
-int max_leg_drawable;
-int max_leg_texture;
-int max_bag_drawable;
-int max_bag_texture;
-int max_shoe_drawable;
-int max_shoe_texture;
-int max_accessory_drawable;
-int max_accessory_texture;
-int max_undershirt_drawable;
-int max_undershirt_texture;
-int max_armor_drawable;
-int max_armor_texture;
-int max_badge_drawable;
-int max_torso2_drawble;
-int max_torso2_texture;
-int max_hat_type;
-int max_hat_color;
-int max_glasses_type;
-int max_glasses_color;
-int max_ear_type;
-int max_ear_color;
-int max_watch_type;
-int max_watch_color;
-int max_bracelet_type;
-int max_bracelet_color;
-bool face_cam_lock = false;
-bool leg_cam_lock = false;
-bool shoe_cam_lock = false;
 
 void OnOutfitMain() {
 	omenu.ReadSettings();
@@ -106,57 +27,9 @@ void OnOutfitMain() {
 }
 
 void reset_outfit_values() {
-	outfit_selected_hairstyle = 0;
-	outfit_selected_haircolor = 0;
-	outfit_selected_highlight = 0;
-	outfit_max_hairstyles = 0;
-	outfit_max_haircolors = 0;
-	outfit_has_blush = false;
-	outfit_selected_blush_type = 0;
-	outfit_selected_blush_color = 0;
-	outfit_selected_blush_opacity = 0.0f;
-	outfit_has_lipstick = false;
-	outfit_selected_lipstick_type = 0;
-	outfit_selected_lipstick_color = 0;
-	outfit_selected_lipstick_opacity = 0.0f;
-	outfit_has_makeup = false;
-	outfit_selected_makeup_type = 0;
-	outfit_selected_makeup_color = 0;
-	outfit_selected_makeup_opacity = 0.0f;
-	mask_drawable = 0;
-	mask_texture = 0;
-	torso_drawable = 0;
-	leg_drawable = 0;
-	leg_texture = 0;
-	bag_drawable = 0;
-	bag_texture = 0;
-	shoe_drawable = 0;
-	shoe_texture = 0;
-	accessory_drawable = 0;
-	accessory_texture = 0;
-	undershirt_drawable = 0;
-	undershirt_texture = 0;
-	armor_drawable = 0;
-	armor_texture = 0;
-	badge_drawable = 0;
-	torso2_drawable = 0;
-	torso2_texture = 0;
-	has_hat = false;
-	hat_type = 0;
-	hat_color = 0;
-	has_glasses = false;
-	glasses_type = 0;
-	glasses_color = 0;
-	has_ear = false;
-	ear_type = 0;
-	ear_color = 0;
-	has_watch = false;
-	watch_type = 0;
-	watch_color = 0;
-	has_bracelet = false;
-	bracelet_type = 0;
-	bracelet_color = 0;
-	eye_color = 0;
+	current_character = CharacterData();
+	OUTFITMENU::outfit_data.outfit_max_hairstyles = 0;
+	OUTFITMENU::outfit_data.outfit_max_haircolors = 0;
 }
 
 void OnOutfitExit() {
@@ -172,6 +45,8 @@ bool OUTFITMENU::isOpen() {
 }
 
 void OUTFITMENU::open() {
+	if (OUTFITMENU::Data::reset) reset_outfit_values();
+
 	omenu.OpenMenu();
 }
 
@@ -271,50 +146,50 @@ void shoecam_end()
 }
 
 void set_outfit_hair_values() {
-	outfit_max_hairstyles = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 2);
-	outfit_max_haircolors = PED::GET_NUM_HAIR_COLORS_();
+	OUTFITMENU::outfit_data.outfit_max_hairstyles = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 2);
+	OUTFITMENU::outfit_data.outfit_max_haircolors = PED::GET_NUM_HAIR_COLORS_();
 }
 
 void set_outfit_max_drawables() {
-	max_mask_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 1);
-	max_torso_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 3) - 1;
-	max_leg_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 4) - 2;
-	max_bag_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 5) - 1;
-	max_shoe_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 6) - 1;
-	max_accessory_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 7) - 1;
-	max_undershirt_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 8) - 2;
-	max_armor_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 9) - 1;
-	max_badge_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 10) - 1;
-	max_torso2_drawble = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 11) - 2;
-	max_hat_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 0);
-	max_glasses_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 1);
-	max_ear_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 2);
-	max_watch_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 6);
-	max_bracelet_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 7);
+	OUTFITMENU::outfit_data.max_mask_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 1);
+	OUTFITMENU::outfit_data.max_torso_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 3) - 1;
+	OUTFITMENU::outfit_data.max_leg_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 4) - 2;
+	OUTFITMENU::outfit_data.max_bag_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 5) - 1;
+	OUTFITMENU::outfit_data.max_shoe_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 6) - 1;
+	OUTFITMENU::outfit_data.max_accessory_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 7) - 1;
+	OUTFITMENU::outfit_data.max_undershirt_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 8) - 2;
+	OUTFITMENU::outfit_data.max_armor_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 9) - 1;
+	OUTFITMENU::outfit_data.max_badge_drawable = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 10) - 1;
+	OUTFITMENU::outfit_data.max_torso2_drawble = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 11) - 2;
+	OUTFITMENU::outfit_data.max_hat_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 0);
+	OUTFITMENU::outfit_data.max_glasses_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 1);
+	OUTFITMENU::outfit_data.max_ear_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 2);
+	OUTFITMENU::outfit_data.max_watch_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 6);
+	OUTFITMENU::outfit_data.max_bracelet_type = PED::GET_NUMBER_OF_PED_PROP_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 7);
 }
 
 void update_outfit_hairmenu() {
 	omenu.Title("Hair");
 	omenu.Subtitle("Customize your hairstyle.");
 
-	if (omenu.IntOption("Hairstyle", outfit_selected_hairstyle, 0, outfit_max_hairstyles)) {
+	if (omenu.IntOption("Hairstyle", current_character.outfit_selected_hairstyle, 0, OUTFITMENU::outfit_data.outfit_max_hairstyles)) {
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, outfit_selected_hairstyle, 0, 0);
-			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, outfit_selected_haircolor, outfit_selected_highlight);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
+			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
 		}
 	}
 
-	if (omenu.IntOption("Hair color", outfit_selected_haircolor, 0, outfit_max_haircolors)) {
+	if (omenu.IntOption("Hair color", current_character.outfit_selected_haircolor, 0, OUTFITMENU::outfit_data.outfit_max_haircolors)) {
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, outfit_selected_hairstyle, 0, 0);
-			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, outfit_selected_haircolor, outfit_selected_highlight);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
+			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
 		}
 	}
 
-	if (omenu.IntOption("Hightlight color", outfit_selected_highlight, 0, outfit_max_haircolors)) {
+	if (omenu.IntOption("Hightlight color", current_character.outfit_selected_highlight, 0, OUTFITMENU::outfit_data.outfit_max_haircolors)) {
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, outfit_selected_hairstyle, 0, 0);
-			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, outfit_selected_haircolor, outfit_selected_highlight);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
+			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
 		}
 	}
 }
@@ -323,35 +198,35 @@ void update_outfit_blushmenu() {
 	omenu.Title("Blush");
 	omenu.Subtitle("Customize your blush.");
 
-	if (omenu.BoolOption("Has blush", outfit_has_blush)) {
+	if (omenu.BoolOption("Has blush", current_character.outfit_has_blush)) {
 		if (OUTFITMENU::Data::creating) {
-			if (!outfit_has_blush) {
+			if (!current_character.outfit_has_blush) {
 				PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, 255, 1);
 			}
 		}
 	}
 
-	if (omenu.IntOption("Type", outfit_selected_blush_type, 0, 6)) {
+	if (omenu.IntOption("Type", current_character.outfit_selected_blush_type, 0, 6)) {
 		if (OUTFITMENU::Data::creating) {
-			outfit_has_blush = true;
-			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, outfit_selected_blush_type, outfit_selected_blush_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, outfit_selected_blush_color, outfit_selected_blush_color);
+			current_character.outfit_has_blush = true;
+			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, current_character.outfit_selected_blush_type, current_character.outfit_selected_blush_opacity);
+			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
 		}
 	}
 
-	if (omenu.IntOption("Color", outfit_selected_blush_color, 0, 63)) {
+	if (omenu.IntOption("Color", current_character.outfit_selected_blush_color, 0, 63)) {
 		if (OUTFITMENU::Data::creating) {
-			outfit_has_blush = true;
-			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, outfit_selected_blush_type, outfit_selected_blush_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, outfit_selected_blush_color, outfit_selected_blush_color);
+			current_character.outfit_has_blush = true;
+			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, current_character.outfit_selected_blush_type, current_character.outfit_selected_blush_opacity);
+			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
 		}
 	}
 
-	if (omenu.FloatOption("Opacity", outfit_selected_blush_opacity, 0.0f, 1.0f)) {
+	if (omenu.FloatOption("Opacity", current_character.outfit_selected_blush_opacity, 0.0f, 1.0f)) {
 		if (OUTFITMENU::Data::creating) {
-			outfit_has_blush = true;
-			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, outfit_selected_blush_type, outfit_selected_blush_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, outfit_selected_blush_color, outfit_selected_blush_color);
+			current_character.outfit_has_blush = true;
+			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, current_character.outfit_selected_blush_type, current_character.outfit_selected_blush_opacity);
+			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
 		}
 	}
 }
@@ -360,35 +235,35 @@ void update_outfit_lipstickmenu() {
 	omenu.Title("Lipstick");
 	omenu.Subtitle("Customize your lipstick.");
 
-	if (omenu.BoolOption("Has lipstick", outfit_has_lipstick)) {
+	if (omenu.BoolOption("Has lipstick", current_character.outfit_has_lipstick)) {
 		if (OUTFITMENU::Data::creating) {
-			if (!outfit_has_lipstick) {
+			if (!current_character.outfit_has_lipstick) {
 				PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, 255, 1);
 			}
 		}
 	}
 
-	if (omenu.IntOption("Type", outfit_selected_lipstick_type, 0, 9)) {
+	if (omenu.IntOption("Type", current_character.outfit_selected_lipstick_type, 0, 9)) {
 		if (OUTFITMENU::Data::creating) {
-			outfit_has_lipstick = true;
-			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, outfit_selected_lipstick_type, outfit_selected_lipstick_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, outfit_selected_lipstick_color, outfit_selected_lipstick_color);
+			current_character.outfit_has_lipstick = true;
+			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, current_character.outfit_selected_lipstick_type, current_character.outfit_selected_lipstick_opacity);
+			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
 		}
 	}
 
-	if (omenu.IntOption("Color", outfit_selected_lipstick_color, 0, 63)) {
+	if (omenu.IntOption("Color", current_character.outfit_selected_lipstick_color, 0, 63)) {
 		if (OUTFITMENU::Data::creating) {
-			outfit_has_lipstick = true;
-			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, outfit_selected_lipstick_type, outfit_selected_lipstick_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, outfit_selected_lipstick_color, outfit_selected_lipstick_color);
+			current_character.outfit_has_lipstick = true;
+			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, current_character.outfit_selected_lipstick_type, current_character.outfit_selected_lipstick_opacity);
+			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
 		}
 	}
 
-	if (omenu.FloatOption("Opacity", outfit_selected_lipstick_opacity, 0.0f, 1.0f)) {
+	if (omenu.FloatOption("Opacity", current_character.outfit_selected_lipstick_opacity, 0.0f, 1.0f)) {
 		if (OUTFITMENU::Data::creating) {
-			outfit_has_lipstick = true;
-			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, outfit_selected_lipstick_type, outfit_selected_lipstick_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, outfit_selected_lipstick_color, outfit_selected_lipstick_color);
+			current_character.outfit_has_lipstick = true;
+			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, current_character.outfit_selected_lipstick_type, current_character.outfit_selected_lipstick_opacity);
+			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
 		}
 	}
 }
@@ -397,35 +272,35 @@ void update_outfit_makeupmenu() {
 	omenu.Title("Makeup");
 	omenu.Subtitle("Customize your makeup.");
 
-	if (omenu.BoolOption("Has makeup", outfit_has_makeup)) {
+	if (omenu.BoolOption("Has makeup", current_character.outfit_has_makeup)) {
 		if (OUTFITMENU::Data::creating) {
-			if (!outfit_has_makeup) {
+			if (!current_character.outfit_has_makeup) {
 				PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, 255, 1);
 			}
 		}
 	}
 
-	if (omenu.IntOption("Style", outfit_selected_makeup_type, 0, 74)) {
+	if (omenu.IntOption("Style", current_character.outfit_selected_makeup_type, 0, 74)) {
 		if (OUTFITMENU::Data::creating) {
-			outfit_has_makeup = true;
-			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, outfit_selected_makeup_type, outfit_selected_makeup_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, outfit_selected_makeup_color, outfit_selected_makeup_color);
+			current_character.outfit_has_makeup = true;
+			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, current_character.outfit_selected_makeup_type, current_character.outfit_selected_makeup_opacity);
+			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
 		}
 	}
 
-	if (omenu.IntOption("Color", outfit_selected_makeup_color, 0, 63)) {
+	if (omenu.IntOption("Color", current_character.outfit_selected_makeup_color, 0, 63)) {
 		if (OUTFITMENU::Data::creating) {
-			outfit_has_makeup = true;
-			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, outfit_selected_makeup_type, outfit_selected_makeup_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, outfit_selected_makeup_color, outfit_selected_makeup_color);
+			current_character.outfit_has_makeup = true;
+			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, current_character.outfit_selected_makeup_type, current_character.outfit_selected_makeup_opacity);
+			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
 		}
 	}
 
-	if (omenu.FloatOption("Opacity", outfit_selected_makeup_opacity, 0.0f, 1.0f)) {
+	if (omenu.FloatOption("Opacity", current_character.outfit_selected_makeup_opacity, 0.0f, 1.0f)) {
 		if (OUTFITMENU::Data::creating) {
-			outfit_has_makeup = true;
-			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, outfit_selected_makeup_type, outfit_selected_makeup_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, outfit_selected_makeup_color, outfit_selected_makeup_color);
+			current_character.outfit_has_makeup = true;
+			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, current_character.outfit_selected_makeup_type, current_character.outfit_selected_makeup_opacity);
+			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
 		}
 	}
 }
@@ -434,18 +309,18 @@ void update_maskmenu() {
 	omenu.Title("Mask");
 	omenu.Subtitle("Change your mask.");
 	
-	if (omenu.IntOption("Type", mask_drawable, 0, max_mask_drawable)) {
-		mask_texture = 0;
-		max_mask_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 1, mask_drawable);
+	if (omenu.IntOption("Type", current_character.mask_drawable, 0, OUTFITMENU::outfit_data.max_mask_drawable)) {
+		current_character.mask_texture = 0;
+		OUTFITMENU::outfit_data.max_mask_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 1, current_character.mask_drawable);
 
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 1, mask_drawable, 0, 0);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 1, current_character.mask_drawable, 0, 0);
 		}
 	}
 
-	if (omenu.IntOption("Color", mask_texture, 0, max_mask_texture)) {
+	if (omenu.IntOption("Color", current_character.mask_texture, 0, OUTFITMENU::outfit_data.max_mask_texture)) {
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 1, mask_drawable, mask_texture, 0);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 1, current_character.mask_drawable, current_character.mask_texture, 0);
 		}
 	}
 }
@@ -454,18 +329,18 @@ void update_legmenu() {
 	omenu.Title("Lower Body");
 	omenu.Subtitle("Change lower body.");
 
-	if (omenu.IntOption("Type", leg_drawable, 0, max_leg_drawable)) {
-		leg_texture = 0;
-		max_leg_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 4, leg_drawable);
+	if (omenu.IntOption("Type", current_character.leg_drawable, 0, OUTFITMENU::outfit_data.max_leg_drawable)) {
+		current_character.leg_texture = 0;
+		OUTFITMENU::outfit_data.max_leg_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 4, current_character.leg_drawable);
 
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 4, leg_drawable, 0, 0);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 4, current_character.leg_drawable, 0, 0);
 		}
 	}
 
-	if (omenu.IntOption("Color", leg_texture, 0, max_leg_texture)) {
+	if (omenu.IntOption("Color", current_character.leg_texture, 0, OUTFITMENU::outfit_data.max_leg_texture)) {
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 4, leg_drawable, leg_texture, 0);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 4, current_character.leg_drawable, current_character.leg_texture, 0);
 		}
 	}
 }
@@ -474,18 +349,18 @@ void update_bagmenu() {
 	omenu.Title("Bags & Parachute");
 	omenu.Subtitle("Change Bags & Parachute.");
 
-	if (omenu.IntOption("Type", bag_drawable, 0, max_bag_drawable)) {
-		bag_texture = 0;
-		max_bag_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 5, bag_drawable);
+	if (omenu.IntOption("Type", current_character.bag_drawable, 0, OUTFITMENU::outfit_data.max_bag_drawable)) {
+		current_character.bag_texture = 0;
+		OUTFITMENU::outfit_data.max_bag_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 5, current_character.bag_drawable);
 
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 5, bag_drawable, 0, 0);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 5, current_character.bag_drawable, 0, 0);
 		}
 	}
 
-	if (omenu.IntOption("Color", bag_texture, 0, max_bag_texture)) {
+	if (omenu.IntOption("Color", current_character.bag_texture, 0, OUTFITMENU::outfit_data.max_bag_texture)) {
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 5, bag_drawable, bag_texture, 0);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 5, current_character.bag_drawable, current_character.bag_texture, 0);
 		}
 	}
 }
@@ -494,18 +369,18 @@ void update_shoemenu() {
 	omenu.Title("Shoes");
 	omenu.Subtitle("Change your shoes.");
 
-	if (omenu.IntOption("Type", shoe_drawable, 0, max_shoe_drawable)) {
-		shoe_texture = 0;
-		max_shoe_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 6, shoe_drawable);
+	if (omenu.IntOption("Type", current_character.shoe_drawable, 0, OUTFITMENU::outfit_data.max_shoe_drawable)) {
+		current_character.shoe_texture = 0;
+		OUTFITMENU::outfit_data.max_shoe_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 6, current_character.shoe_drawable);
 
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 6, shoe_drawable, 0, 0);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 6, current_character.shoe_drawable, 0, 0);
 		}
 	}
 
-	if (omenu.IntOption("Color", shoe_texture, 0, max_shoe_texture)) {
+	if (omenu.IntOption("Color", current_character.shoe_texture, 0, OUTFITMENU::outfit_data.max_shoe_texture)) {
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 6, shoe_drawable, shoe_texture, 0);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 6, current_character.shoe_drawable, current_character.shoe_texture, 0);
 		}
 	}
 }
@@ -514,18 +389,18 @@ void update_accessorymenu() {
 	omenu.Title("Accessory");
 	omenu.Subtitle("Change your accessory.");
 
-	if (omenu.IntOption("Type", accessory_drawable, 0, max_accessory_drawable)) {
-		accessory_texture = 0;
-		max_accessory_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 7, accessory_drawable);
+	if (omenu.IntOption("Type", current_character.accessory_drawable, 0, OUTFITMENU::outfit_data.max_accessory_drawable)) {
+		current_character.accessory_texture = 0;
+		OUTFITMENU::outfit_data.max_accessory_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 7, current_character.accessory_drawable);
 
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 7, accessory_drawable, 0, 0);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 7, current_character.accessory_drawable, 0, 0);
 		}
 	}
 
-	if (omenu.IntOption("Color", accessory_texture, 0, max_accessory_texture)) {
+	if (omenu.IntOption("Color", current_character.accessory_texture, 0, OUTFITMENU::outfit_data.max_accessory_texture)) {
 		if (OUTFITMENU::Data::creating) {
-			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 7, accessory_drawable, accessory_texture, 0);
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 7, current_character.accessory_drawable, current_character.accessory_texture, 0);
 		}
 	}
 }
@@ -534,15 +409,15 @@ void update_undermenu() {
 	omenu.Title("Undershirt");
 	omenu.Subtitle("Change your undershirt.");
 
-	if (omenu.IntOption("Type", undershirt_drawable, 0, max_undershirt_drawable)) {
-		undershirt_texture = 0;
-		max_undershirt_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 8, undershirt_drawable);
+	if (omenu.IntOption("Type", current_character.undershirt_drawable, 0, OUTFITMENU::outfit_data.max_undershirt_drawable)) {
+		current_character.undershirt_texture = 0;
+		OUTFITMENU::outfit_data.max_undershirt_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 8, current_character.undershirt_drawable);
 
-		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 8, undershirt_drawable, 0, 0);
+		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 8, current_character.undershirt_drawable, 0, 0);
 	}
 
-	if (omenu.IntOption("Color", undershirt_texture, 0, max_undershirt_texture)) {
-		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 8, undershirt_drawable, undershirt_texture, 0);
+	if (omenu.IntOption("Color", current_character.undershirt_texture, 0, OUTFITMENU::outfit_data.max_undershirt_texture)) {
+		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 8, current_character.undershirt_drawable, current_character.undershirt_texture, 0);
 	}
 }
 
@@ -550,15 +425,15 @@ void update_armormenu() {
 	omenu.Title("Armor");
 	omenu.Subtitle("Change your armor.");
 
-	if (omenu.IntOption("Type", armor_drawable, 0, max_armor_drawable)) {
-		armor_texture = 0;
-		max_armor_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 9, armor_drawable);
+	if (omenu.IntOption("Type", current_character.armor_drawable, 0, OUTFITMENU::outfit_data.max_armor_drawable)) {
+		current_character.armor_texture = 0;
+		OUTFITMENU::outfit_data.max_armor_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 9, current_character.armor_drawable);
 
-		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 9, armor_drawable, 0, 0);
+		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 9, current_character.armor_drawable, 0, 0);
 	}
 
-	if (omenu.IntOption("Color", armor_texture, 0, max_armor_texture)) {
-		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 9, armor_drawable, armor_texture, 0);
+	if (omenu.IntOption("Color", current_character.armor_texture, 0, OUTFITMENU::outfit_data.max_armor_texture)) {
+		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 9, current_character.armor_drawable, current_character.armor_texture, 0);
 	}
 }
 
@@ -566,15 +441,15 @@ void update_uppermenu() {
 	omenu.Title("Upper Body");
 	omenu.Subtitle("Change upper body.");
 
-	if (omenu.IntOption("Type", torso2_drawable, 0, max_torso2_drawble)) {
-		torso2_texture = 0;
-		max_torso2_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 11, torso2_drawable);
+	if (omenu.IntOption("Type", current_character.torso2_drawable, 0, OUTFITMENU::outfit_data.max_torso2_drawble)) {
+		current_character.torso2_texture = 0;
+		OUTFITMENU::outfit_data.max_torso2_texture = PED::GET_NUMBER_OF_PED_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 11, current_character.torso2_drawable);
 
-		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 11, torso2_drawable, 0, 0);
+		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 11, current_character.torso2_drawable, 0, 0);
 	}
 
-	if (omenu.IntOption("Color", torso2_texture, 0, max_torso2_texture)) {
-		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 11, torso2_drawable, torso2_texture, 0);
+	if (omenu.IntOption("Color", current_character.torso2_texture, 0, OUTFITMENU::outfit_data.max_torso2_texture)) {
+		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 11, current_character.torso2_drawable, current_character.torso2_texture, 0);
 	}
 }
 
@@ -582,24 +457,24 @@ void update_hatmenu() {
 	omenu.Title("Hat");
 	omenu.Subtitle("Change your hat.");
 
-	if (omenu.BoolOption("Has hat", has_hat)) {
-		if (OUTFITMENU::Data::creating && !has_hat) PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 0);
+	if (omenu.BoolOption("Has hat", current_character.has_hat)) {
+		if (OUTFITMENU::Data::creating && !current_character.has_hat) PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 0);
 	}
 
-	if (omenu.IntOption("Type", hat_type, 0, max_hat_type)) {
-		hat_color = 0;
-		max_hat_color = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 0, hat_type);
+	if (omenu.IntOption("Type", current_character.hat_type, 0, OUTFITMENU::outfit_data.max_hat_type)) {
+		current_character.hat_color = 0;
+		OUTFITMENU::outfit_data.max_hat_color = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 0, current_character.hat_type);
 
 		if (OUTFITMENU::Data::creating) {
-			has_hat = true;
-			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 0, hat_type, 0, 1);
+			current_character.has_hat = true;
+			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 0, current_character.hat_type, 0, 1);
 		}
 	}
 
-	if (omenu.IntOption("Color", hat_color, 0, max_hat_color)) {
+	if (omenu.IntOption("Color", current_character.hat_color, 0, OUTFITMENU::outfit_data.max_hat_color)) {
 		if (OUTFITMENU::Data::creating) {
-			has_hat = true;
-			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 0, hat_type, hat_color, 1);
+			current_character.has_hat = true;
+			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 0, current_character.hat_type, current_character.hat_color, 1);
 		}
 	}
 }
@@ -608,24 +483,24 @@ void update_glassmenu() {
 	omenu.Title("Glasses");
 	omenu.Subtitle("Change your glasses");
 
-	if (omenu.BoolOption("Has glasses", has_glasses)) {
-		if (OUTFITMENU::Data::creating && !has_glasses) PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 1);
+	if (omenu.BoolOption("Has glasses", current_character.has_glasses)) {
+		if (OUTFITMENU::Data::creating && !current_character.has_glasses) PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 1);
 	}
 
-	if (omenu.IntOption("Type", glasses_type, 0, max_glasses_type)) {
-		glasses_color = 0;
-		max_glasses_color = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 1, glasses_type);
+	if (omenu.IntOption("Type", current_character.glasses_type, 0, OUTFITMENU::outfit_data.max_glasses_type)) {
+		current_character.glasses_color = 0;
+		OUTFITMENU::outfit_data.max_glasses_color = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 1, current_character.glasses_type);
 
 		if (OUTFITMENU::Data::creating) {
-			has_glasses = true;
-			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 1, glasses_type, 0, 1);
+			current_character.has_glasses = true;
+			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 1, current_character.glasses_type, 0, 1);
 		}
 	}
 
-	if (omenu.IntOption("Color", glasses_color, 0, max_glasses_color)) {
+	if (omenu.IntOption("Color", current_character.glasses_color, 0, OUTFITMENU::outfit_data.max_glasses_color)) {
 		if (OUTFITMENU::Data::creating) {
-			has_glasses = true;
-			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 1, glasses_type, glasses_color, 1);
+			current_character.has_glasses = true;
+			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 1, current_character.glasses_type, current_character.glasses_color, 1);
 		}
 	}
 }
@@ -634,24 +509,24 @@ void update_earmenu() {
 	omenu.Title("Ear Accessory");
 	omenu.Subtitle("Change your ear accessory");
 
-	if (omenu.BoolOption("Has ear accessory", has_ear)) {
-		if (OUTFITMENU::Data::creating && !has_ear) PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 2);
+	if (omenu.BoolOption("Has ear accessory", current_character.has_ear)) {
+		if (OUTFITMENU::Data::creating && !current_character.has_ear) PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 2);
 	}
 
-	if (omenu.IntOption("Type", ear_type, 0, max_ear_type)) {
-		ear_color = 0;
-		max_ear_color = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 2, ear_type);
+	if (omenu.IntOption("Type", current_character.ear_type, 0, OUTFITMENU::outfit_data.max_ear_type)) {
+		current_character.ear_color = 0;
+		OUTFITMENU::outfit_data.max_ear_color = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 2, current_character.ear_type);
 
 		if (OUTFITMENU::Data::creating) {
-			has_ear = true;
-			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 2, ear_type, 0, 1);
+			current_character.has_ear = true;
+			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 2, current_character.ear_type, 0, 1);
 		}
 	}
 
-	if (omenu.IntOption("Color", ear_color, 0, max_ear_color)) {
+	if (omenu.IntOption("Color", current_character.ear_color, 0, OUTFITMENU::outfit_data.max_ear_color)) {
 		if (OUTFITMENU::Data::creating) {
-			has_ear = true;
-			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 2, ear_type, ear_color, 1);
+			current_character.has_ear = true;
+			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 2, current_character.ear_type, current_character.ear_color, 1);
 		}
 	}
 }
@@ -660,24 +535,24 @@ void update_watchmenu() {
 	omenu.Title("Watch");
 	omenu.Subtitle("Change your watch");
 
-	if (omenu.BoolOption("Has watch", has_watch)) {
-		if (OUTFITMENU::Data::creating && !has_watch) PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 6);
+	if (omenu.BoolOption("Has watch", current_character.has_watch)) {
+		if (OUTFITMENU::Data::creating && !current_character.has_watch) PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 6);
 	}
 
-	if (omenu.IntOption("Type", watch_type, 0, max_watch_type)) {
-		watch_color = 0;
-		max_watch_color = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 6, watch_type);
+	if (omenu.IntOption("Type", current_character.watch_type, 0, OUTFITMENU::outfit_data.max_watch_type)) {
+		current_character.watch_color = 0;
+		OUTFITMENU::outfit_data.max_watch_color = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 6, current_character.watch_type);
 
 		if (OUTFITMENU::Data::creating) {
-			has_watch = true;
-			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 6, watch_type, 0, 1);
+			current_character.has_watch = true;
+			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 6, current_character.watch_type, 0, 1);
 		}
 	}
 
-	if (omenu.IntOption("Color", watch_color, 0, max_watch_color)) {
+	if (omenu.IntOption("Color", current_character.watch_color, 0, OUTFITMENU::outfit_data.max_watch_color)) {
 		if (OUTFITMENU::Data::creating) {
-			has_watch = true;
-			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 6, watch_type, watch_color, 1);
+			current_character.has_watch = true;
+			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 6, current_character.watch_type, current_character.watch_color, 1);
 		}
 	}
 }
@@ -686,24 +561,24 @@ void update_braceletmenu() {
 	omenu.Title("Bracelet");
 	omenu.Subtitle("Change your bracelet");
 
-	if (omenu.BoolOption("Has bracelet", has_bracelet)) {
-		if (OUTFITMENU::Data::creating && !has_bracelet) PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 7);
+	if (omenu.BoolOption("Has bracelet", current_character.has_bracelet)) {
+		if (OUTFITMENU::Data::creating && !current_character.has_bracelet) PED::CLEAR_PED_PROP(GlobalData::PLAYER_ID, 7);
 	}
 
-	if (omenu.IntOption("Type", bracelet_type, 0, max_bracelet_type)) {
-		bracelet_color = 0;
-		max_bracelet_color = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 7, bracelet_type);
+	if (omenu.IntOption("Type", current_character.bracelet_type, 0, OUTFITMENU::outfit_data.max_bracelet_type)) {
+		current_character.bracelet_color = 0;
+		OUTFITMENU::outfit_data.max_bracelet_color = PED::GET_NUMBER_OF_PED_PROP_TEXTURE_VARIATIONS(GlobalData::PLAYER_ID, 7, current_character.bracelet_type);
 
 		if (OUTFITMENU::Data::creating) {
-			has_bracelet = true;
-			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 7, bracelet_type, 0, 1);
+			current_character.has_bracelet = true;
+			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 7, current_character.bracelet_type, 0, 1);
 		}
 	}
 
-	if (omenu.IntOption("Color", bracelet_color, 0, max_bracelet_color)) {
+	if (omenu.IntOption("Color", current_character.bracelet_color, 0, OUTFITMENU::outfit_data.max_bracelet_color)) {
 		if (OUTFITMENU::Data::creating) {
-			has_bracelet = true;
-			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 7, bracelet_type, bracelet_color, 1);
+			current_character.has_bracelet = true;
+			PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 7, current_character.bracelet_type, current_character.bracelet_color, 1);
 		}
 	}
 }
@@ -712,8 +587,8 @@ void update_eyemenu() {
 	omenu.Title("Eyes");
 	omenu.Subtitle("Customize your eyes");
 
-	if (omenu.IntOption("Eye color", eye_color, 0, 29)) {
-		if (OUTFITMENU::Data::creating) PED::SET_PED_EYE_COLOR_(GlobalData::PLAYER_ID, eye_color);
+	if (omenu.IntOption("Eye color", current_character.eye_color, 0, 29)) {
+		if (OUTFITMENU::Data::creating) PED::SET_PED_EYE_COLOR_(GlobalData::PLAYER_ID, current_character.eye_color);
 	}
 }
 
@@ -723,7 +598,7 @@ void update_clothesmenu() {
 
 	if (omenu.MenuOption("Eyes", "eyemenu", { "Customize your eyes." })) {
 		faceshot_start();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 
 	if (omenu.MenuOption("Hair", "hairmenu", { "Change your hairstyle." })) {
@@ -732,46 +607,46 @@ void update_clothesmenu() {
 
 	if (omenu.MenuOption("Blush", "blushmenu", { "Change your blush." })) {
 		faceshot_start();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 
 	if (omenu.MenuOption("Lipstick", "lipstickmenu", { "Change your lipstick." })) {
 		faceshot_start();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 
 	if (omenu.MenuOption("Makeup", "makeupmenu", { "Change your makeup." })) {
 		faceshot_start();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 
 	if (omenu.MenuOption("Mask", "maskmenu", { "Change your mask." })) {
 		faceshot_start();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 	
-	if (omenu.IntOption("Torso", torso_drawable, 0, max_torso_drawable, 1, { "Change your torso." })) {
-		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 3, torso_drawable, 0, 0);
+	if (omenu.IntOption("Torso", current_character.torso_drawable, 0, OUTFITMENU::outfit_data.max_torso_drawable, 1, { "Change your torso." })) {
+		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 3, current_character.torso_drawable, 0, 0);
 	}
 
 	if (omenu.MenuOption("Lower body", "legmenu", { "Change lower body." })) {
 		legcam_start();
-		leg_cam_lock = true;
+		OUTFITMENU::outfit_data.leg_cam_lock = true;
 	}
 
 	omenu.MenuOption("Bags & Parachute", "bagmenu", { "Change Bags & Parachute." });
 
 	if (omenu.MenuOption("Shoes", "shoemenu", { "Change your shoes." })) {
 		shoecam_start();
-		shoe_cam_lock = true;
+		OUTFITMENU::outfit_data.shoe_cam_lock = true;
 	}
 
 	omenu.MenuOption("Accessory", "accessorymenu", { "Change your accessory." });
 	omenu.MenuOption("Undershirt", "undermenu", { "Change your undershirt." });
 	omenu.MenuOption("Armor", "armormenu", { "Change your armor." });
 
-	if (omenu.IntOption("Badge", badge_drawable, 0, max_badge_drawable, 1, { "Change your badge." })) {
-		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 10, badge_drawable, 0, 0);
+	if (omenu.IntOption("Badge", current_character.badge_drawable, 0, OUTFITMENU::outfit_data.max_badge_drawable, 1, { "Change your badge." })) {
+		if (OUTFITMENU::Data::creating) PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 10, current_character.badge_drawable, 0, 0);
 	}
 
 	omenu.MenuOption("Upper body", "uppermenu", { "Change upper body." });
@@ -779,7 +654,7 @@ void update_clothesmenu() {
 
 	if (omenu.MenuOption("Glasess", "glassmenu", { "Change your glasess." })) {
 		faceshot_start();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 
 	omenu.MenuOption("Ear accessory", "earmenu", { "Change your ear accessory." });
@@ -796,55 +671,55 @@ void save_outfit() {
 	std::string filepath = "CharacterCreationData\\Outfits\\";
 	filepath = filepath.append(name) + ".json";
 	nlohmann::json j;
-	j["eyecolor"] = eye_color;
-	j["hair"]["style"] = outfit_selected_hairstyle;
-	j["hair"]["color"] = outfit_selected_haircolor;
-	j["hair"]["highlight"] = outfit_selected_highlight;
-	j["blush"]["enabled"] = outfit_has_blush;
-	j["blush"]["type"] = outfit_selected_blush_type;
-	j["blush"]["color"] = outfit_selected_blush_color;
-	j["blush"]["opacity"] = outfit_selected_blush_opacity;
-	j["lipstick"]["enabled"] = outfit_has_lipstick;
-	j["lipstick"]["type"] = outfit_selected_lipstick_type;
-	j["lipstick"]["color"] = outfit_selected_lipstick_color;
-	j["lipstick"]["opacity"] = outfit_selected_lipstick_opacity;
-	j["makeup"]["enabled"] = outfit_has_makeup;
-	j["makeup"]["type"] = outfit_selected_makeup_type;
-	j["makeup"]["color"] = outfit_selected_makeup_color;
-	j["makeup"]["opacity"] = outfit_selected_makeup_opacity;
-	j["mask"]["drawable"] = mask_drawable;
-	j["mask"]["texture"] = mask_texture;
-	j["leg"]["drawable"] = leg_drawable;
-	j["leg"]["texture"] = leg_texture;
-	j["bag"]["drawable"] = bag_drawable;
-	j["bag"]["texture"] = bag_texture;
-	j["shoe"]["drawable"] = shoe_drawable;
-	j["shoe"]["texture"] = shoe_texture;
-	j["accessory"]["drawable"] = accessory_drawable;
-	j["accessory"]["texture"] = accessory_texture;
-	j["torso"]["drawable"] = torso_drawable;
-	j["torso2"]["drawable"] = torso2_drawable;
-	j["torso2"]["texture"] = torso2_texture;
-	j["undershirt"]["drawable"] = undershirt_drawable;
-	j["undershirt"]["texture"] = undershirt_texture;
-	j["armor"]["drawable"] = armor_drawable;
-	j["armor"]["texture"] = armor_texture;
-	j["hat"]["enabled"] = has_hat;
-	j["hat"]["drawable"] = hat_type;
-	j["hat"]["texture"] = hat_color;
-	j["glasses"]["enabled"] = has_glasses;
-	j["glasses"]["drawable"] = glasses_type;
-	j["glasses"]["texture"] = glasses_color;
-	j["ear"]["enabled"] = has_ear;
-	j["ear"]["drawable"] = ear_type;
-	j["ear"]["texture"] = ear_color;
-	j["watch"]["enabled"] = has_watch;
-	j["watch"]["drawable"] = watch_type;
-	j["watch"]["texture"] = watch_color;
-	j["bracelet"]["enabled"] = has_bracelet;
-	j["bracelet"]["drawable"] = bracelet_type;
-	j["bracelet"]["texture"] = bracelet_color;
-	j["badge"] = badge_drawable;
+	j["eyecolor"] = current_character.eye_color;
+	j["hair"]["style"] = current_character.outfit_selected_hairstyle;
+	j["hair"]["color"] = current_character.outfit_selected_haircolor;
+	j["hair"]["highlight"] = current_character.outfit_selected_highlight;
+	j["blush"]["enabled"] = current_character.outfit_has_blush;
+	j["blush"]["type"] = current_character.outfit_selected_blush_type;
+	j["blush"]["color"] = current_character.outfit_selected_blush_color;
+	j["blush"]["opacity"] = current_character.outfit_selected_blush_opacity;
+	j["lipstick"]["enabled"] = current_character.outfit_has_lipstick;
+	j["lipstick"]["type"] = current_character.outfit_selected_lipstick_type;
+	j["lipstick"]["color"] = current_character.outfit_selected_lipstick_color;
+	j["lipstick"]["opacity"] = current_character.outfit_selected_lipstick_opacity;
+	j["makeup"]["enabled"] = current_character.outfit_has_makeup;
+	j["makeup"]["type"] = current_character.outfit_selected_makeup_type;
+	j["makeup"]["color"] = current_character.outfit_selected_makeup_color;
+	j["makeup"]["opacity"] = current_character.outfit_selected_makeup_opacity;
+	j["mask"]["drawable"] = current_character.mask_drawable;
+	j["mask"]["texture"] = current_character.mask_texture;
+	j["leg"]["drawable"] = current_character.leg_drawable;
+	j["leg"]["texture"] = current_character.leg_texture;
+	j["bag"]["drawable"] = current_character.bag_drawable;
+	j["bag"]["texture"] = current_character.bag_texture;
+	j["shoe"]["drawable"] = current_character.shoe_drawable;
+	j["shoe"]["texture"] = current_character.shoe_texture;
+	j["accessory"]["drawable"] = current_character.accessory_drawable;
+	j["accessory"]["texture"] = current_character.accessory_texture;
+	j["torso"]["drawable"] = current_character.torso_drawable;
+	j["torso2"]["drawable"] = current_character.torso2_drawable;
+	j["torso2"]["texture"] = current_character.torso2_texture;
+	j["undershirt"]["drawable"] = current_character.undershirt_drawable;
+	j["undershirt"]["texture"] = current_character.undershirt_texture;
+	j["armor"]["drawable"] = current_character.armor_drawable;
+	j["armor"]["texture"] = current_character.armor_texture;
+	j["hat"]["enabled"] = current_character.has_hat;
+	j["hat"]["drawable"] = current_character.hat_type;
+	j["hat"]["texture"] = current_character.hat_color;
+	j["glasses"]["enabled"] = current_character.has_glasses;
+	j["glasses"]["drawable"] = current_character.glasses_type;
+	j["glasses"]["texture"] = current_character.glasses_color;
+	j["ear"]["enabled"] = current_character.has_ear;
+	j["ear"]["drawable"] = current_character.ear_type;
+	j["ear"]["texture"] = current_character.ear_color;
+	j["watch"]["enabled"] = current_character.has_watch;
+	j["watch"]["drawable"] = current_character.watch_type;
+	j["watch"]["texture"] = current_character.watch_color;
+	j["bracelet"]["enabled"] = current_character.has_bracelet;
+	j["bracelet"]["drawable"] = current_character.bracelet_type;
+	j["bracelet"]["texture"] = current_character.bracelet_color;
+	j["badge"] = current_character.badge_drawable;
 	std::ofstream o(filepath);
 	o << std::setw(4) << j << std::endl;
 	SCREEN::ShowNotification("~g~Outfit saved!");
@@ -865,9 +740,9 @@ void update_outfitmenu() {
 
 void OUTFITMENU::OnTick() {
 	omenu.CheckKeys();
-	face_cam_lock = false;
-	leg_cam_lock = false;
-	shoe_cam_lock = false;
+	OUTFITMENU::outfit_data.face_cam_lock = false;
+	OUTFITMENU::outfit_data.leg_cam_lock = false;
+	OUTFITMENU::outfit_data.shoe_cam_lock = false;
 
 	if (omenu.CurrentMenu("mainmenu")) {
 		update_outfitmenu();
@@ -880,30 +755,30 @@ void OUTFITMENU::OnTick() {
 	}
 	else if (omenu.CurrentMenu("blushmenu")) {
 		update_outfit_blushmenu();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 	else if (omenu.CurrentMenu("lipstickmenu")) {
 		update_outfit_lipstickmenu();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 	else if (omenu.CurrentMenu("makeupmenu")) {
 		update_outfit_makeupmenu();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 	else if (omenu.CurrentMenu("maskmenu")) {
 		update_maskmenu();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 	else if (omenu.CurrentMenu("legmenu")) {
 		update_legmenu();
-		leg_cam_lock = true;
+		OUTFITMENU::outfit_data.leg_cam_lock = true;
 	}
 	else if (omenu.CurrentMenu("bagmenu")) {
 		update_bagmenu();
 	}
 	else if (omenu.CurrentMenu("shoemenu")) {
 		update_shoemenu();
-		shoe_cam_lock = true;
+		OUTFITMENU::outfit_data.shoe_cam_lock = true;
 	}
 	else if (omenu.CurrentMenu("accessorymenu")) {
 		update_accessorymenu();
@@ -922,7 +797,7 @@ void OUTFITMENU::OnTick() {
 	}
 	else if (omenu.CurrentMenu("glassmenu")) {
 		update_glassmenu();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 	else if (omenu.CurrentMenu("earmenu")) {
 		update_earmenu();
@@ -935,12 +810,12 @@ void OUTFITMENU::OnTick() {
 	}
 	else if (omenu.CurrentMenu("eyemenu")) {
 		update_eyemenu();
-		face_cam_lock = true;
+		OUTFITMENU::outfit_data.face_cam_lock = true;
 	}
 
-	if (!face_cam_lock) faceshot_end();
-	if (!leg_cam_lock) legcam_end();
-	if (!shoe_cam_lock) shoecam_end();
+	if (!OUTFITMENU::outfit_data.face_cam_lock) faceshot_end();
+	if (!OUTFITMENU::outfit_data.leg_cam_lock) legcam_end();
+	if (!OUTFITMENU::outfit_data.shoe_cam_lock) shoecam_end();
 
 	omenu.EndMenu();
 }

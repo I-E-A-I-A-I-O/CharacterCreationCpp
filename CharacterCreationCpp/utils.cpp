@@ -18,6 +18,19 @@ size_t UTILS::ranInt(const size_t& max, const size_t& min)
 	return min + (std::rand() % (max - min + 1));
 }
 
+bool UTILS::is_main_character() {
+	return PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0xD7114C9) || PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0x9B22DBAF) || PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0x9B810FA2);
+}
+
+bool UTILS::is_freemode_character() {
+	return PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0x9C9EFFD8) || PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0x705E61F2);
+}
+
+bool UTILS::is_main_character_2() {
+	Hash player_model = ENTITY::GET_ENTITY_MODEL(GlobalData::PLAYER_ID);
+	return player_model == 0xD7114C9 || player_model == 0x9B22DBAF || player_model == 0x9B810FA2;
+}
+
 bool UTILS::isInRange(const Vector3& a, const Vector3& b, const float& range)
 {
 	Vector3 dif = Vector3();
