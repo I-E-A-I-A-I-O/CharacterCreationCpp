@@ -668,6 +668,12 @@ void save_outfit() {
 	while (MISC::UPDATE_ONSCREEN_KEYBOARD() == 0) WAIT(0);
 
 	const char* name = MISC::GET_ONSCREEN_KEYBOARD_RESULT();
+
+	if (name == NULL) {
+		SCREEN::ShowNotification("~r~Save canceled.");
+		return;
+	}
+
 	std::string filepath = "CharacterCreationData\\Outfits\\";
 	filepath = filepath.append(name) + ".json";
 	nlohmann::json j;

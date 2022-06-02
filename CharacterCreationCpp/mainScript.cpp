@@ -9,6 +9,7 @@
 #include "screen.h"
 #include "enums.h"
 #include "blip.h"
+#include "characterData.h"
 
 int GlobalData::PLAYER_ID;
 bool GlobalData::swapped = false;
@@ -18,6 +19,8 @@ bool died = false;
 Hash to_model = 0x705E61F2;
 Blip creation_blip;
 Blip outfit_blip;
+Blip hospital_blip;
+Blip barbershop_blip;
 
 void lock_player() {
 	TASK::TASK_ACHIEVE_HEADING(GlobalData::PLAYER_ID, 270, 0);
@@ -30,6 +33,7 @@ void unlock_player() {
 
 void prepare_creation(bool male) {
 	lock_player();
+	CHARACTERMENU::Data::mode = CHARACTERMENU::eMenuMode::all;
 	transisioning = true;
 
 	if (male) to_model = 0x705E61F2;
@@ -43,23 +47,38 @@ void leave_creation() {
 }
 
 void handle_creation_menu_opening() {
-	if (!UTILS::can_open_creationmenu()) {
+	if (UTILS::can_open_creationmenu()) {
+		SCREEN::ShowHelpTextThisFrame_long("Press ~INPUT_CONTEXT~ to enter creation mode with MP Female.", "\nPress ~INPUT_CONTEXT_SECONDARY~ to enter creation mode with MP Male.", false);
 
-		if (CHARACTERMENU::isOpen()) {
-			leave_creation();
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+			prepare_creation(false);
 		}
 
-		return;
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, 52)) {
+			prepare_creation(true);
+		}
 	}
 
-	SCREEN::ShowHelpTextThisFrame_long("Press ~INPUT_CONTEXT~ to enter creation mode with MP Female.", "\nPress ~INPUT_CONTEXT_SECONDARY~ to enter creation mode with MP Male.", false);
+	if (UTILS::can_open_hospitalmenu()) {
+		SCREEN::ShowHelpTextThisFrame("Press ~INPUT_CONTEXT~ to enter shape customization.", false);
 
-	if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
-		prepare_creation(false);
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+			lock_player();
+			CHARACTERMENU::Data::mode = CHARACTERMENU::eMenuMode::shape;
+			CHARACTERMENU::Data::creating = true;
+			CHARACTERMENU::open();
+		}
 	}
 
-	if (PAD::IS_CONTROL_JUST_PRESSED(0, 52)) {
-		prepare_creation(true);
+	if (UTILS::can_open_barbershopmenu()) {
+		SCREEN::ShowHelpTextThisFrame("Press ~INPUT_CONTEXT~ to enter cosmetic customization.", false);
+
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+			lock_player();
+			CHARACTERMENU::Data::mode = CHARACTERMENU::eMenuMode::cosmetic;
+			CHARACTERMENU::Data::creating = true;
+			CHARACTERMENU::open();
+		}
 	}
 }
 
@@ -107,6 +126,8 @@ void creation_tick() {
 		GlobalData::PLAYER_ID = PLAYER::PLAYER_PED_ID();
 		PED::SET_PED_DEFAULT_COMPONENT_VARIATION(GlobalData::PLAYER_ID);
 		PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, true);
+		current_character = CharacterData();
+		current_shape = ShapeData();
 		CAM::DO_SCREEN_FADE_IN(2000);
 		transisioning = false;
 		GlobalData::swapped = true;
@@ -189,6 +210,8 @@ int main() {
 	OUTFITMENU::Initialize();
 	creation_blip = BLIPS::Create(-1042.3564f, -2745.46924f, 20.36439f, eBlipSprite::BlipSpriteClothes, eBlipColor::BlipColorGreen, "Character Creation");
 	outfit_blip = BLIPS::Create(-1204.60474f, -780.3441f, 16.3322849f, eBlipSprite::BlipSpriteClothes, eBlipColor::BlipColorBlue, "Outfit Creation");
+	barbershop_blip = BLIPS::Create(-31.3666f, -145.0191f, 56.0639f, eBlipSprite::BlipSpriteBarber, eBlipColor::BlipColorBlue, "Cosmetic Customization");
+	barbershop_blip = BLIPS::Create(-453.2057f, -339.4345f, 33.3635f, eBlipSprite::BlipSpriteHospital, eBlipColor::BlipColorBlue, "Shape Customization");
 
 	for (;;) {
 		GlobalData::PLAYER_ID = PLAYER::PLAYER_PED_ID();
@@ -212,7 +235,9 @@ void MainScriptMain() {
 
 void MainScriptAbort() {
 	HUD::REMOVE_BLIP(&creation_blip);
-	HUD::REMOVE_BLIP(&creation_blip);
+	HUD::REMOVE_BLIP(&outfit_blip);
+	HUD::REMOVE_BLIP(&barbershop_blip);
+	HUD::REMOVE_BLIP(&hospital_blip);
 
 	if (CHARACTERMENU::Data::creating) {
 		unlock_player();

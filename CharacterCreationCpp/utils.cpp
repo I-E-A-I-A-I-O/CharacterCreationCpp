@@ -69,6 +69,30 @@ bool UTILS::can_open_creationmenu() {
 	return false;
 }
 
+bool UTILS::can_open_hospitalmenu() {
+	if (is_freemode_character()) {
+		Vector3 creation_coords = Vector3();
+		creation_coords.x = -453.2057f;
+		creation_coords.y = -339.4345f;
+		creation_coords.z = 33.3635f;
+
+		if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), creation_coords, 5)) return !is_busy();
+	}
+	return false;
+}
+
+bool UTILS::can_open_barbershopmenu() {
+	if (is_freemode_character()) {
+		Vector3 creation_coords = Vector3();
+		creation_coords.x = -31.3666f;
+		creation_coords.y = -145.0191f;
+		creation_coords.z = 56.0639f;
+
+		if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), creation_coords, 5)) return !is_busy();
+	}
+	return false;
+}
+
 void UTILS::loadModel(Hash model) {
 	STREAMING::REQUEST_MODEL(model);
 

@@ -9,6 +9,7 @@
 #include <fstream>
 
 bool CHARACTERMENU::Data::creating = false;
+CHARACTERMENU::eMenuMode CHARACTERMENU::Data::mode = CHARACTERMENU::eMenuMode::all;
 NativeMenu::Menu menu;
 ShapeData current_shape = ShapeData();
 Cam face_camera;
@@ -25,7 +26,8 @@ void OnMain() {
 void reset_items() {
 	max_hairstyles = 0;
 	max_haircolors = 0;
-	current_shape = ShapeData();
+
+	if (CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::all) current_shape = ShapeData();
 }
 
 void OnExit() {
@@ -57,6 +59,12 @@ void save_values() {
 	while (MISC::UPDATE_ONSCREEN_KEYBOARD() == 0) WAIT(0);
 
 	const char* name = MISC::GET_ONSCREEN_KEYBOARD_RESULT();
+
+	if (name == NULL) {
+		SCREEN::ShowNotification("~r~Save canceled.");
+		return;
+	}
+
 	std::string filepath = "CharacterCreationData\\Characters\\";
 	filepath = filepath.append(name) + ".json";
 	nlohmann::json j;
@@ -660,66 +668,77 @@ void update_molesmenu() {
 
 void update_customization() {
 	menu.Title("Character Creation");
-	menu.Subtitle("Create a new character.");
-	menu.MenuOption("Shape", "shapemenu", { "Customize your face features." });
 
-	if (menu.MenuOption("Hair", "hairmenu", { "Change your hairstyle." })) {
-		set_hair_values();
+	if (CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::all) {
+		menu.Subtitle("Create a new character.");
 	}
-	
-	if (menu.MenuOption("Eyebrows", "eyebrowmenu", { "Change your eyebrows." })) {
-		facecam_start();
-		face_lock = true;
+	else {
+		menu.Subtitle("Customize your character.");
 	}
 
-	if (menu.MenuOption("Beard", "beardmenu", { "Change your beard." })) {
-		facecam_start();
-		face_lock = true;
+	if (CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::all || CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::shape) {
+		menu.MenuOption("Shape", "shapemenu", { "Customize your face features." });
 	}
 
-	if (menu.MenuOption("Chest Hair", "chestmenu", { "Change your chest hair." })) {
-		facecam_start();
-		face_lock = true;
-	}
+	if (CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::all || CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::cosmetic) {
+		if (menu.MenuOption("Hair", "hairmenu", { "Change your hairstyle." })) {
+			set_hair_values();
+		}
 
-	if (menu.MenuOption("Blush", "blushmenu", { "Change your blush." })) {
-		facecam_start();
-		face_lock = true;
-	}
+		if (menu.MenuOption("Eyebrows", "eyebrowmenu", { "Change your eyebrows." })) {
+			facecam_start();
+			face_lock = true;
+		}
 
-	if (menu.MenuOption("Lipstick", "lipstickmenu", { "Change your lipstick." })) {
-		facecam_start();
-		face_lock = true;
-	}
+		if (menu.MenuOption("Beard", "beardmenu", { "Change your beard." })) {
+			facecam_start();
+			face_lock = true;
+		}
 
-	if (menu.MenuOption("Blemish", "blemishmenu", { "Change your blemish." })) {
-		facecam_start();
-		face_lock = true;
-	}
+		if (menu.MenuOption("Chest Hair", "chestmenu", { "Change your chest hair." })) {
+			facecam_start();
+			face_lock = true;
+		}
 
-	if (menu.MenuOption("Age", "agemenu", { "Change your age." })) {
-		facecam_start();
-		face_lock = true;
-	}
+		if (menu.MenuOption("Blush", "blushmenu", { "Change your blush." })) {
+			facecam_start();
+			face_lock = true;
+		}
 
-	if (menu.MenuOption("Makeup", "makeupmenu", { "Change your makeup." })) {
-		facecam_start();
-		face_lock = true;
-	}
+		if (menu.MenuOption("Lipstick", "lipstickmenu", { "Change your lipstick." })) {
+			facecam_start();
+			face_lock = true;
+		}
 
-	if (menu.MenuOption("Complexion", "complexmenu", { "Change your complexion." })) {
-		facecam_start();
-		face_lock = true;
-	}
+		if (menu.MenuOption("Blemish", "blemishmenu", { "Change your blemish." })) {
+			facecam_start();
+			face_lock = true;
+		}
 
-	if (menu.MenuOption("Sun Damage", "sunmenu", { "Change your sun damage." })) {
-		facecam_start();
-		face_lock = true;
-	}
+		if (menu.MenuOption("Age", "agemenu", { "Change your age." })) {
+			facecam_start();
+			face_lock = true;
+		}
 
-	if (menu.MenuOption("Moles & Freckles", "molesmenu", { "Change your moles and freckles." })) {
-		facecam_start();
-		face_lock = true;
+		if (menu.MenuOption("Makeup", "makeupmenu", { "Change your makeup." })) {
+			facecam_start();
+			face_lock = true;
+		}
+
+		if (menu.MenuOption("Complexion", "complexmenu", { "Change your complexion." })) {
+			facecam_start();
+			face_lock = true;
+		}
+
+		if (menu.MenuOption("Sun Damage", "sunmenu", { "Change your sun damage." })) {
+			facecam_start();
+			face_lock = true;
+		}
+
+		if (menu.MenuOption("Moles & Freckles", "molesmenu", { "Change your moles and freckles." })) {
+			facecam_start();
+			face_lock = true;
+		}
 	}
 }
 
