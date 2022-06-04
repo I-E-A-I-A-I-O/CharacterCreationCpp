@@ -3,7 +3,7 @@
 #include "natives.h"
 #include "utils.h"
 #include "mainScript.h"
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 #include "screen.h"
 #include "characterData.h"
 #include <filesystem>
@@ -65,7 +65,10 @@ void faceshot_start()
 	Hash player_model = ENTITY::GET_ENTITY_MODEL(GlobalData::PLAYER_ID);
 	Vector3 dimensions = Vector3();
 	Vector3 ignore = Vector3();
-	Vector3 cam_offset = Vector3(0.1f, 0.4f, 0.5f);
+	Vector3 cam_offset = Vector3();
+	cam_offset.x = 0.1f;
+	//cam_offset.y = 0.4f;
+	cam_offset.y = 0.5f;
 	Vector3 bone_coords = PED::GET_PED_BONE_COORDS(GlobalData::PLAYER_ID, eBone::SKEL_Head, cam_offset);
 	Vector3 cam_look_coords = Vector3();
 	MISC::GET_MODEL_DIMENSIONS(player_model, &dimensions, &ignore);
@@ -93,7 +96,10 @@ void legcam_start() {
 	Hash player_model = ENTITY::GET_ENTITY_MODEL(GlobalData::PLAYER_ID);
 	Vector3 dimensions = Vector3();
 	Vector3 ignore = Vector3();
-	Vector3 cam_offset = Vector3(0.35f, 1.0f, 0.9f);
+	Vector3 cam_offset = Vector3();
+	cam_offset.x = 0.35f;
+	//cam_offset.y = 1.0f;
+	cam_offset.y = 0.9f;
 	Vector3 bone_coords = PED::GET_PED_BONE_COORDS(GlobalData::PLAYER_ID, eBone::SKEL_Pelvis, cam_offset);
 	Vector3 cam_look_coords = Vector3();
 	MISC::GET_MODEL_DIMENSIONS(player_model, &dimensions, &ignore);
@@ -121,7 +127,10 @@ void shoecam_start() {
 	Hash player_model = ENTITY::GET_ENTITY_MODEL(GlobalData::PLAYER_ID);
 	Vector3 dimensions = Vector3();
 	Vector3 ignore = Vector3();
-	Vector3 cam_offset = Vector3(0.5f, 1.0f, 0.8f);
+	Vector3 cam_offset = Vector3();
+	cam_offset.x = 0.5f;
+	//cam_offset.y = 1.0f;
+	cam_offset.y = 0.8f;
 	Vector3 bone_coords = PED::GET_PED_BONE_COORDS(GlobalData::PLAYER_ID, eBone::SKEL_Pelvis, cam_offset);
 	Vector3 cam_look_coords = Vector3();
 	MISC::GET_MODEL_DIMENSIONS(player_model, &dimensions, &ignore);

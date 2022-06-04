@@ -3,7 +3,7 @@
 #include "natives.h"
 #include "utils.h"
 #include "mainScript.h"
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 #include "screen.h"
 #include "characterData.h"
 #include <filesystem>

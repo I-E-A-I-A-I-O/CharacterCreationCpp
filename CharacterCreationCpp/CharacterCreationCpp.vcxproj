@@ -144,8 +144,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\Users\Jesus\Downloads\simpleini;C:\Users\Jesus\Downloads\include\single_include\nlohmann;C:\Users\Jesus\Downloads\ScriptHookV_SDK_1.0.617.1a\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Users\Jesus\Downloads\GTA Modding\tools\ScriptHookV_SDK_1.0.617.1a\inc;C:\Users\Jesus\Downloads\Cpp Libraries\nhlolman json\single_include;C:\Users\Jesus\Downloads\Cpp Libraries\simpleini;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -153,7 +153,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>C:\Users\Jesus\Downloads\ScriptHookV_SDK_1.0.617.1a\lib\ScriptHookV.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Users\Jesus\Downloads\GTA Modding\tools\ScriptHookV_SDK_1.0.617.1a\lib\ScriptHookV.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

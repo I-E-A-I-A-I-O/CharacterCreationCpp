@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "mainScript.h"
-#include "json.hpp"
+#include "nlohmann/json.hpp"
 #include "natives.h"
 #include "characterCreationMenu.h"
 #include "loadingMenu.h"
