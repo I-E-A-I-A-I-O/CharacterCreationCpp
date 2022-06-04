@@ -211,7 +211,7 @@ int main() {
 	creation_blip = BLIPS::Create(-1042.3564f, -2745.46924f, 20.36439f, eBlipSprite::BlipSpriteClothes, eBlipColor::BlipColorGreen, "Character Creation");
 	outfit_blip = BLIPS::Create(-1204.60474f, -780.3441f, 16.3322849f, eBlipSprite::BlipSpriteClothes, eBlipColor::BlipColorBlue, "Outfit Creation");
 	barbershop_blip = BLIPS::Create(-31.3666f, -145.0191f, 56.0639f, eBlipSprite::BlipSpriteBarber, eBlipColor::BlipColorBlue, "Cosmetic Customization");
-	barbershop_blip = BLIPS::Create(-453.2057f, -339.4345f, 33.3635f, eBlipSprite::BlipSpriteHospital, eBlipColor::BlipColorBlue, "Shape Customization");
+	hospital_blip = BLIPS::Create(-453.2057f, -339.4345f, 33.3635f, eBlipSprite::BlipSpriteHospital, eBlipColor::BlipColorBlue, "Shape Customization");
 
 	for (;;) {
 		GlobalData::PLAYER_ID = PLAYER::PLAYER_PED_ID();
