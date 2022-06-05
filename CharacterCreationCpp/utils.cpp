@@ -29,6 +29,11 @@ bool UTILS::is_main_character_2() {
 	return player_model == 0xD7114C9 || player_model == 0x9B22DBAF || player_model == 0x9B810FA2;
 }
 
+eGender UTILS::get_gender() {
+	if (PED::IS_PED_MODEL(GlobalData::PLAYER_ID, 0x9C9EFFD8)) return eGender::GenderFemale;
+	return eGender::GenderMale;
+}
+
 bool UTILS::isInRange(const Vector3& a, const Vector3& b, const float& range)
 {
 	Vector3 dif = Vector3();

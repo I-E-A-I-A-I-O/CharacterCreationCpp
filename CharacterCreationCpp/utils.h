@@ -2,6 +2,7 @@
 
 #include "mainScript.h"
 #include "types.h"
+#include "enums.h"
 
 namespace UTILS {
 	int ranInt(const int& max, const int& min);
@@ -19,5 +20,6 @@ namespace UTILS {
 	bool is_main_character();
 	bool is_main_character_2();
 	bool is_freemode_character();
+	eGender get_gender();
 	Vector3 aroundCoords(float distance, Vector3 coords);
 }

@@ -8,6 +8,13 @@
 #include "characterData.h"
 #include <fstream>
 
+struct Tat {
+	Hash collection;
+	Hash overlay;
+	std::string zone;
+	std::string update_group;
+};
+
 bool CHARACTERMENU::Data::creating = false;
 CHARACTERMENU::eMenuMode CHARACTERMENU::Data::mode = CHARACTERMENU::eMenuMode::all;
 NativeMenu::Menu menu;
@@ -16,6 +23,7 @@ Cam face_camera;
 int max_hairstyles;
 int max_haircolors;
 bool face_lock = false;
+std::vector<Tat> tats = {};
 
 void OnMain() {
 	face_camera = CAM::CREATE_CAM("DEFAULT_SCRIPTED_CAMERA", 0);
@@ -28,6 +36,31 @@ void reset_items() {
 	max_haircolors = 0;
 
 	if (CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::all) current_shape = ShapeData();
+}
+
+void load_tattoos() {
+	std::ifstream i("CharacterCreationData\\pedOverlayCollections.json");
+	nlohmann::json j;
+	j << i;
+	i.close();
+
+	tats = {};
+
+	for (auto& collection : j.items()) {
+		nlohmann::json col = collection.value();
+		Hash collection_hash = col.at("CollectionHash");
+
+		for (auto& overlay : col.at("Overlays").items()) {
+			nlohmann::json ov = overlay.value();
+			std::string type = ov.at("Type");
+
+			if (type != "TYPE_TATTOO") continue;
+
+			std::string gender = ov.at("Gender");
+
+			Hash overlay_hash = ov.at("OverlayHash");
+		}
+	}
 }
 
 void OnExit() {
