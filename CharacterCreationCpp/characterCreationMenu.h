@@ -6,7 +6,8 @@ namespace CHARACTERMENU {
 	enum class eMenuMode {
 		all,
 		shape,
-		cosmetic
+		cosmetic,
+		tattoo
 	};
 
 	struct Data {

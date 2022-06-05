@@ -23,6 +23,8 @@ int selected_larm_tat;
 int selected_rarm_tat;
 int selected_lleg_tat;
 int selected_rleg_tat;
+bool tattoo_lock_out;
+bool tattoo_lock_in;
 
 std::map<std::string, std::vector<Tattoo>> tattoos = {
 	{ "ZONE_HEAD", std::vector<Tattoo>() },
@@ -890,14 +892,76 @@ void update_customization() {
 			facecam_start();
 			face_lock = true;
 		}
-
-		menu.MenuOption("Tattoos", "tattoomenu");
 	}
+
+	if (CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::all || CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::tattoo) {
+		if (menu.MenuOption("Tattoos", "tattoomenu")) {
+			PED::CLEAR_ALL_PED_PROPS(GlobalData::PLAYER_ID);
+			PED::SET_PED_DEFAULT_COMPONENT_VARIATION(GlobalData::PLAYER_ID);
+
+			if (UTILS::get_gender() == eGender::GenderFemale) {
+				PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 11, 15, 0, 0);
+				PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 8, 2, 0, 0);
+				PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 3, 15, 0, 0);
+				PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 4, 15, 0, 0);
+			}
+			else {
+				PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 11, 15, 0, 0);
+				PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 8, 15, 0, 0);
+				PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 3, 15, 0, 0);
+				PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 4, 21, 0, 0);
+			}
+
+			tattoo_lock_out = true;
+			tattoo_lock_in = false;
+		}
+	}
+}
+
+void restore_outfit() {
+	if (tattoo_lock_in) return;
+
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
+	PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 1, current_character.mask_drawable, current_character.mask_texture, 0);
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 4, current_character.leg_drawable, current_character.leg_texture, 0);
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 5, current_character.bag_drawable, current_character.bag_texture, 0);
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 6, current_character.shoe_drawable, current_character.shoe_texture, 0);
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 7, current_character.accessory_drawable, current_character.accessory_texture, 0);
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 8, current_character.undershirt_drawable, current_character.undershirt_texture, 0);
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 9, current_character.armor_drawable, current_character.armor_texture, 0);
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 11, current_character.torso2_drawable, current_character.torso2_texture, 0);
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 3, current_character.torso_drawable, 0, 0);
+	PED::SET_PED_EYE_COLOR_(GlobalData::PLAYER_ID, current_character.eye_color);
+	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 10, current_character.badge_drawable, 0, 0);
+
+	if (current_character.has_hat) {
+		PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 0, current_character.hat_type, current_character.hat_color, 1);
+	}
+
+	if (current_character.has_glasses) {
+		PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 1, current_character.glasses_type, current_character.glasses_color, 1);
+	}
+
+	if (current_character.has_ear) {
+		PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 2, current_character.ear_type, current_character.ear_color, 1);
+	}
+
+	if (current_character.has_watch) {
+		PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 6, current_character.watch_type, current_character.watch_color, 1);
+	}
+
+	if (current_character.has_bracelet) {
+		PED::SET_PED_PROP_INDEX(GlobalData::PLAYER_ID, 7, current_character.bracelet_type, current_character.bracelet_color, 1);
+	}
+
+	tattoo_lock_in = true;
 }
 
 void CHARACTERMENU::OnTick() {
 	menu.CheckKeys();
 	face_lock = false;
+	tattoo_lock_out = false;
 
 	if (menu.CurrentMenu("mainmenu")) {
 		update_mainmenu();
@@ -957,9 +1021,11 @@ void CHARACTERMENU::OnTick() {
 	}
 	else if (menu.CurrentMenu("tattoomenu")) {
 		update_tattoomenu();
+		tattoo_lock_out = true;
 	}
 
 	if (!face_lock) facecam_end();
+	if (!tattoo_lock_out) restore_outfit();
 
 	menu.EndMenu();
 }
