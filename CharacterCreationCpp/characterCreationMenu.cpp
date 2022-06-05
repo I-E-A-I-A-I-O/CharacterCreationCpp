@@ -7,13 +7,7 @@
 #include "screen.h"
 #include "characterData.h"
 #include <fstream>
-
-struct Tat {
-	Hash collection;
-	Hash overlay;
-	std::string zone;
-	std::string update_group;
-};
+#include <map>
 
 bool CHARACTERMENU::Data::creating = false;
 CHARACTERMENU::eMenuMode CHARACTERMENU::Data::mode = CHARACTERMENU::eMenuMode::all;
@@ -23,7 +17,21 @@ Cam face_camera;
 int max_hairstyles;
 int max_haircolors;
 bool face_lock = false;
-std::vector<Tat> tats = {};
+int selected_head_tat;
+int selected_torso_tat;
+int selected_larm_tat;
+int selected_rarm_tat;
+int selected_lleg_tat;
+int selected_rleg_tat;
+
+std::map<std::string, std::vector<Tattoo>> tattoos = {
+	{ "ZONE_HEAD", std::vector<Tattoo>() },
+	{ "ZONE_LEFT_ARM", std::vector<Tattoo>() },
+	{ "ZONE_RIGHT_ARM", std::vector<Tattoo>() },
+	{ "ZONE_LEFT_ARM", std::vector<Tattoo>() },
+	{ "ZONE_LEFT_LEG", std::vector<Tattoo>() },
+	{ "ZONE_TORSO", std::vector<Tattoo>() }
+};
 
 void OnMain() {
 	face_camera = CAM::CREATE_CAM("DEFAULT_SCRIPTED_CAMERA", 0);
@@ -34,17 +42,60 @@ void OnMain() {
 void reset_items() {
 	max_hairstyles = 0;
 	max_haircolors = 0;
+	selected_head_tat = 0;
+	selected_torso_tat = 0;
+	selected_larm_tat = 0;
+	selected_rarm_tat = 0;
+	selected_lleg_tat = 0;
+	selected_rleg_tat = 0;
 
 	if (CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::all) current_shape = ShapeData();
+}
+
+void reset_tattoo_lists() {
+	tattoos["ZONE_HEAD"].clear();
+	tattoos["ZONE_LEFT_ARM"].clear();
+	tattoos["ZONE_RIGHT_ARM"].clear();
+	tattoos["ZONE_RIGHT_LEG"].clear();
+	tattoos["ZONE_LEFT_LEG"].clear();
+	tattoos["ZONE_TORSO"].clear();
+}
+
+void refresh_tattoos() {
+	PED::CLEAR_PED_DECORATIONS_LEAVE_SCARS(GlobalData::PLAYER_ID);
+
+	if (current_shape.head_tattoo.collection != 0) {
+		PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.head_tattoo.collection, current_shape.head_tattoo.overlay);
+	}
+
+	if (current_shape.torso_tattoo.collection != 0) {
+		PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.torso_tattoo.collection, current_shape.torso_tattoo.overlay);
+	}
+
+	if (current_shape.larm_tattoo.collection != 0) {
+		PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.larm_tattoo.collection, current_shape.larm_tattoo.overlay);
+	}
+
+	if (current_shape.rarm_tattoo.collection != 0) {
+		PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.rarm_tattoo.collection, current_shape.rarm_tattoo.overlay);
+	}
+
+	if (current_shape.rleg_tattoo.collection != 0) {
+		PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.rleg_tattoo.collection, current_shape.rleg_tattoo.overlay);
+	}
+
+	if (current_shape.lleg_tattoo.collection != 0) {
+		PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.lleg_tattoo.collection, current_shape.lleg_tattoo.overlay);
+	}
 }
 
 void load_tattoos() {
 	std::ifstream i("CharacterCreationData\\pedOverlayCollections.json");
 	nlohmann::json j;
-	j << i;
+	i >> j;
 	i.close();
 
-	tats = {};
+	reset_tattoo_lists();
 
 	for (auto& collection : j.items()) {
 		nlohmann::json col = collection.value();
@@ -56,9 +107,26 @@ void load_tattoos() {
 
 			if (type != "TYPE_TATTOO") continue;
 
+			eGender character_gender = UTILS::get_gender();
 			std::string gender = ov.at("Gender");
 
+			if ((gender == "GENDER_FEMALE" && character_gender != eGender::GenderFemale) || (gender == "GENDER_MALE" && character_gender != eGender::GenderMale) || gender == "GENDER_DONTCARE") continue;
+
+			std::string zone = ov.at("ZoneName");
+
+			if (ov.find("UpdateGroup") == ov.end()) continue;
+
+			std::string updateGroup = ov.at("UpdateGroup");
+
+			if (updateGroup == "hairOverlay") continue;
+
 			Hash overlay_hash = ov.at("OverlayHash");
+			Tattoo tat = Tattoo();
+			tat.collection = collection_hash;
+			tat.overlay = overlay_hash;
+			tat.zone = zone;
+			tat.update_group = updateGroup;
+			tattoos[zone].push_back(tat);
 		}
 	}
 }
@@ -73,6 +141,7 @@ bool CHARACTERMENU::isOpen() {
 }
 
 void CHARACTERMENU::open() {
+	load_tattoos();
 	menu.OpenMenu();
 }
 
@@ -702,6 +771,52 @@ void update_molesmenu() {
 	}
 }
 
+void update_tattoomenu() {
+	menu.Title("Tattoos");
+
+	if (menu.IntOption("Head", selected_head_tat, 0, tattoos["ZONE_HEAD"].size() - 1)) {
+		if (CHARACTERMENU::Data::creating) {
+			current_shape.head_tattoo = tattoos["ZONE_HEAD"].at(selected_head_tat);
+			refresh_tattoos();
+		}
+	}
+
+	if (menu.IntOption("Torso", selected_torso_tat, 0, tattoos["ZONE_TORSO"].size() - 1)) {
+		if (CHARACTERMENU::Data::creating) {
+			current_shape.torso_tattoo = tattoos["ZONE_TORSO"].at(selected_torso_tat);
+			refresh_tattoos();
+		}
+	}
+
+	if (menu.IntOption("Left arm", selected_larm_tat, 0, tattoos["ZONE_LEFT_ARM"].size() - 1)) {
+		if (CHARACTERMENU::Data::creating) {
+			current_shape.larm_tattoo = tattoos["ZONE_LEFT_ARM"].at(selected_larm_tat);
+			refresh_tattoos();
+		}
+	}
+
+	if (menu.IntOption("Right arm", selected_rarm_tat, 0, tattoos["ZONE_RIGHT_ARM"].size() - 1)) {
+		if (CHARACTERMENU::Data::creating) {
+			current_shape.rarm_tattoo = tattoos["ZONE_RIGHT_ARM"].at(selected_rarm_tat);
+			refresh_tattoos();
+		}
+	}
+
+	if (menu.IntOption("Left leg", selected_lleg_tat, 0, tattoos["ZONE_LEFT_LEG"].size() - 1)) {
+		if (CHARACTERMENU::Data::creating) {
+			current_shape.lleg_tattoo = tattoos["ZONE_LEFT_LEG"].at(selected_lleg_tat);
+			refresh_tattoos();
+		}
+	}
+
+	if (menu.IntOption("Right leg", selected_rleg_tat, 0, tattoos["ZONE_RIGHT_LEG"].size() - 1)) {
+		if (CHARACTERMENU::Data::creating) {
+			current_shape.rleg_tattoo = tattoos["ZONE_RIGHT_LEG"].at(selected_rleg_tat);
+			refresh_tattoos();
+		}
+	}
+}
+
 void update_customization() {
 	menu.Title("Character Creation");
 
@@ -775,6 +890,8 @@ void update_customization() {
 			facecam_start();
 			face_lock = true;
 		}
+
+		menu.MenuOption("Tattoos", "tattoomenu");
 	}
 }
 
@@ -837,6 +954,9 @@ void CHARACTERMENU::OnTick() {
 	}
 	else if (menu.CurrentMenu("shapemenu")) {
 		update_shapemenu();
+	}
+	else if (menu.CurrentMenu("tattoomenu")) {
+		update_tattoomenu();
 	}
 
 	if (!face_lock) facecam_end();

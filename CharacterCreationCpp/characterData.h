@@ -52,12 +52,20 @@ typedef struct {
 	int eye_color;
 } CharacterData;
 
-typedef struct {
+typedef struct Tattoo {
+	Hash collection = 0;
+	Hash overlay = 0;
+	std::string zone;
+	std::string update_group;
+} Tattoo;
 
-} Tattoos;
-
 typedef struct {
-	//Tattoos tattoos;
+	Tattoo head_tattoo;
+	Tattoo larm_tattoo;
+	Tattoo rarm_tattoo;
+	Tattoo lleg_tattoo;
+	Tattoo rleg_tattoo;
+	Tattoo torso_tattoo;
 	bool has_eyebrows;
 	int selected_eyebrow_type;
 	int selected_eyebrow_color;
