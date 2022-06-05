@@ -115,6 +115,26 @@ bool UTILS::can_open_barbershopmenu() {
 	return false;
 }
 
+bool UTILS::can_open_tattoomenu() {
+	for (auto& coords : tattoo_coords) {
+		Vector3 shop_coords = Vector3();
+		shop_coords.x = coords.x;
+		shop_coords.y = coords.y;
+		shop_coords.z = coords.z;
+
+		if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), shop_coords, 5)) {
+			if (is_busy()) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 void UTILS::loadModel(Hash model) {
 	STREAMING::REQUEST_MODEL(model);
 

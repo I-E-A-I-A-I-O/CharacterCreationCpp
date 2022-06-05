@@ -79,6 +79,17 @@ void handle_creation_menu_opening() {
 			CHARACTERMENU::open();
 		}
 	}
+
+	if (UTILS::can_open_tattoomenu()) {
+		SCREEN::ShowHelpTextThisFrame("Press ~INPUT_CONTEXT~ to enter tattoo customization.", false);
+
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+			lock_player();
+			CHARACTERMENU::Data::mode = CHARACTERMENU::eMenuMode::tattoo;
+			CHARACTERMENU::Data::creating = true;
+			CHARACTERMENU::open();
+		}
+	}
 }
 
 void handle_loading_menu_opening() {

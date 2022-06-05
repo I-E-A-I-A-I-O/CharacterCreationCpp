@@ -54,7 +54,7 @@ inline std::vector<Coords> tattoo_coords = {
 	Coords(320.9127f, 176.4153f, 102.6271f),
 	Coords(-3166.484f, 1073.67f, 19.84789f),
 	Coords(1858.272f, 3747.994f, 32.08252f),
-	Coords(-288.3917f, 6200.439f, 30.46353f),
+	Coords(-288.3917f, 6200.439f, 30.46353f)
 };
 
 void MainScriptMain();

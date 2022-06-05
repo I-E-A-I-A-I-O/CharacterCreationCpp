@@ -13,6 +13,7 @@ namespace UTILS {
 	bool can_open_creationmenu();
 	bool can_open_hospitalmenu();
 	bool can_open_barbershopmenu();
+	bool can_open_tattoomenu();
 	size_t ranInt(const size_t& max, const size_t& min);
 	bool isInRange(const Vector3& a, const Vector3& b, const float& range);
 	void loadModel(Hash model);
