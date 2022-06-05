@@ -1,12 +1,13 @@
 #pragma once
 
+#include "mainScript.h"
 #include "types.h"
 
 namespace UTILS {
 	int ranInt(const int& max, const int& min);
 	float ranFloat();
 	float ranFloat(float max);
-	bool can_open_outfitmenu();
+	bool can_open_outfitmenu(OutInCoords& p_active_location);
 	bool can_open_loadingmenu();
 	bool can_open_creationmenu();
 	bool can_open_hospitalmenu();

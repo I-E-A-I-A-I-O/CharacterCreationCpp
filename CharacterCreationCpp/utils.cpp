@@ -1,11 +1,9 @@
 #include "pch.h"
 #include "utils.h"
 #include "natives.h"
-#include "mainScript.h"
 #include "screen.h"
 #include <cmath>
 #include <math.h>
-#include <vector>
 #include <string>
 
 int UTILS::ranInt(const int& max, const int& min)
@@ -49,13 +47,24 @@ bool UTILS::can_open_loadingmenu() {
 	return !can_open_creationmenu() && !is_busy();
 }
 
-bool UTILS::can_open_outfitmenu() {
-	Vector3 creation_coords = Vector3();
-	creation_coords.x = -1204.60474f;
-	creation_coords.y = -780.3441f;
-	creation_coords.z = 16.3322849f;
+bool UTILS::can_open_outfitmenu(OutInCoords& p_active_location) {
+	for (auto& coords : clothes_coords) {
+		Vector3 shop_coords = Vector3();
+		shop_coords.x = coords.out_coord.x;
+		shop_coords.y = coords.out_coord.y;
+		shop_coords.z = coords.out_coord.z;
 
-	if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), creation_coords, 5)) return !is_busy();
+		if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), shop_coords, 5)) {
+			if (is_busy()) {
+				return false;
+			}
+			else {
+				p_active_location = coords;
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
 
@@ -82,14 +91,22 @@ bool UTILS::can_open_hospitalmenu() {
 }
 
 bool UTILS::can_open_barbershopmenu() {
-	if (is_freemode_character()) {
-		Vector3 creation_coords = Vector3();
-		creation_coords.x = -31.3666f;
-		creation_coords.y = -145.0191f;
-		creation_coords.z = 56.0639f;
+	for (auto& coords : barber_coords) {
+		Vector3 shop_coords = Vector3();
+		shop_coords.x = coords.x;
+		shop_coords.y = coords.y;
+		shop_coords.z = coords.z;
 
-		if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), creation_coords, 5)) return !is_busy();
+		if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), shop_coords, 5)) {
+			if (is_busy()) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
 	}
+
 	return false;
 }
 

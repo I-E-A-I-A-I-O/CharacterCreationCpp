@@ -18,9 +18,8 @@ bool entering = false;
 bool died = false;
 Hash to_model = 0x705E61F2;
 Blip creation_blip;
-Blip outfit_blip;
 Blip hospital_blip;
-Blip barbershop_blip;
+OutInCoords current_shop = OutInCoords(Coords(0, 0, 0), Coords(0, 0, 0));
 
 void lock_player() {
 	TASK::TASK_ACHIEVE_HEADING(GlobalData::PLAYER_ID, 270, 0);
@@ -99,20 +98,22 @@ void handle_loading_menu_opening() {
 }
 
 void handle_outfitmenu_open() {
-	if (!UTILS::can_open_outfitmenu() || !UTILS::is_freemode_character()) return;
+	if (!OUTFITMENU::Data::creating && !entering) {
+		if (!UTILS::can_open_outfitmenu(current_shop) || !UTILS::is_freemode_character()) return;
 
-	SCREEN::ShowHelpTextThisFrame_long("Press ~INPUT_CONTEXT~ to enter outfit creation.",  "\nPress ~INPUT_CONTEXT_SECONDARY~ to edit the current outfit.", false);
+		SCREEN::ShowHelpTextThisFrame_long("Press ~INPUT_CONTEXT~ to enter outfit creation.", "\nPress ~INPUT_CONTEXT_SECONDARY~ to edit the current outfit.", false);
 
-	if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
-		lock_player();
-		entering = true;
-		OUTFITMENU::Data::reset = true;
-	}
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+			lock_player();
+			entering = true;
+			OUTFITMENU::Data::reset = true;
+		}
 
-	if (PAD::IS_CONTROL_JUST_PRESSED(0, 52)) {
-		lock_player();
-		entering = true;
-		OUTFITMENU::Data::reset = false;
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, 52)) {
+			lock_player();
+			entering = true;
+			OUTFITMENU::Data::reset = false;
+		}
 	}
 }
 
@@ -148,7 +149,7 @@ void outfit_tick() {
 	if (entering) {
 		CAM::DO_SCREEN_FADE_OUT(2000);
 		WAIT(4000);
-		ENTITY::SET_ENTITY_COORDS(GlobalData::PLAYER_ID, -1188.65857f, -765.6327f, 16.3201351f, 1, 0, 0, 1);
+		ENTITY::SET_ENTITY_COORDS(GlobalData::PLAYER_ID, current_shop.in_coord.x, current_shop.in_coord.y, current_shop.in_coord.z, 1, 0, 0, 1);
 		
 		if (OUTFITMENU::Data::reset) {
 			PED::SET_PED_DEFAULT_COMPONENT_VARIATION(GlobalData::PLAYER_ID);
@@ -167,7 +168,7 @@ void outfit_tick() {
 		if (!OUTFITMENU::isOpen()) {
 			CAM::DO_SCREEN_FADE_OUT(2000);
 			WAIT(4000);
-			ENTITY::SET_ENTITY_COORDS(GlobalData::PLAYER_ID, -1204.60474f, -780.3441f, 16.3322849f, 1, 0, 0, 1);
+			ENTITY::SET_ENTITY_COORDS(GlobalData::PLAYER_ID, current_shop.out_coord.x, current_shop.out_coord.y, current_shop.out_coord.z, 1, 0, 0, 1);
 			WAIT(2000);
 			CAM::DO_SCREEN_FADE_IN(2000);
 			WAIT(1500);
@@ -209,8 +210,6 @@ int main() {
 	CHARACTERMENU::Initialize();
 	OUTFITMENU::Initialize();
 	creation_blip = BLIPS::Create(-1042.3564f, -2745.46924f, 20.36439f, eBlipSprite::BlipSpriteClothes, eBlipColor::BlipColorGreen, "Character Creation");
-	outfit_blip = BLIPS::Create(-1204.60474f, -780.3441f, 16.3322849f, eBlipSprite::BlipSpriteClothes, eBlipColor::BlipColorBlue, "Outfit Creation");
-	barbershop_blip = BLIPS::Create(-31.3666f, -145.0191f, 56.0639f, eBlipSprite::BlipSpriteBarber, eBlipColor::BlipColorBlue, "Cosmetic Customization");
 	hospital_blip = BLIPS::Create(-453.2057f, -339.4345f, 33.3635f, eBlipSprite::BlipSpriteHospital, eBlipColor::BlipColorBlue, "Shape Customization");
 
 	for (;;) {
@@ -235,8 +234,6 @@ void MainScriptMain() {
 
 void MainScriptAbort() {
 	HUD::REMOVE_BLIP(&creation_blip);
-	HUD::REMOVE_BLIP(&outfit_blip);
-	HUD::REMOVE_BLIP(&barbershop_blip);
 	HUD::REMOVE_BLIP(&hospital_blip);
 
 	if (CHARACTERMENU::Data::creating) {

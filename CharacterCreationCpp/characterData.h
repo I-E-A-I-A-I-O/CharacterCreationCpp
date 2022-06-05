@@ -53,6 +53,11 @@ typedef struct {
 } CharacterData;
 
 typedef struct {
+
+} Tattoos;
+
+typedef struct {
+	Tattoos tattoos;
 	bool has_eyebrows;
 	int selected_eyebrow_type;
 	int selected_eyebrow_color;
