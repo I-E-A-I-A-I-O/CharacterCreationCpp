@@ -377,6 +377,62 @@ void load_character(const std::string& character_name) {
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 9, current_shape.selected_moles, 1);
 	}
 
+	if (j.find("tattoos") != j.end()) {
+		current_shape.head_tattoo.collection = j["tattoos"]["head"]["collection"];
+		current_shape.head_tattoo.overlay = j["tattoos"]["head"]["overlay"];
+		current_shape.head_tattoo.zone = j["tattoos"]["head"]["zone"];
+		current_shape.head_tattoo.update_group = j["tattoos"]["head"]["update_group"];
+
+		if (current_shape.head_tattoo.collection != 0) {
+			PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.head_tattoo.collection, current_shape.head_tattoo.overlay);
+		}
+
+		current_shape.torso_tattoo.collection = j["tattoos"]["torso"]["collection"];
+		current_shape.torso_tattoo.overlay = j["tattoos"]["torso"]["overlay"];
+		current_shape.torso_tattoo.zone = j["tattoos"]["torso"]["zone"];
+		current_shape.torso_tattoo.update_group = j["tattoos"]["torso"]["update_group"];
+
+		if (current_shape.torso_tattoo.collection != 0) {
+			PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.torso_tattoo.collection, current_shape.torso_tattoo.overlay);
+		}
+
+		current_shape.larm_tattoo.collection = j["tattoos"]["leftArm"]["collection"];
+		current_shape.larm_tattoo.overlay = j["tattoos"]["leftArm"]["overlay"];
+		current_shape.larm_tattoo.zone = j["tattoos"]["leftArm"]["zone"];
+		current_shape.larm_tattoo.update_group = j["tattoos"]["leftArm"]["update_group"];
+
+		if (current_shape.larm_tattoo.collection != 0) {
+			PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.larm_tattoo.collection, current_shape.larm_tattoo.overlay);
+		}
+
+		current_shape.rarm_tattoo.collection = j["tattoos"]["rightArm"]["collection"];
+		current_shape.rarm_tattoo.overlay = j["tattoos"]["rightArm"]["overlay"];
+		current_shape.rarm_tattoo.zone = j["tattoos"]["rightArm"]["zone"];
+		current_shape.rarm_tattoo.update_group = j["tattoos"]["rightArm"]["update_group"];
+
+		if (current_shape.rarm_tattoo.collection != 0) {
+			PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.rarm_tattoo.collection, current_shape.rarm_tattoo.overlay);
+		}
+
+		current_shape.lleg_tattoo.collection = j["tattoos"]["leftLeg"]["collection"];
+		current_shape.lleg_tattoo.overlay = j["tattoos"]["leftLeg"]["overlay"];
+		current_shape.lleg_tattoo.zone = j["tattoos"]["leftLeg"]["zone"];
+		current_shape.lleg_tattoo.update_group = j["tattoos"]["leftLeg"]["update_group"];
+
+		if (current_shape.lleg_tattoo.collection != 0) {
+			PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.lleg_tattoo.collection, current_shape.lleg_tattoo.overlay);
+		}
+
+		current_shape.rleg_tattoo.collection = j["tattoos"]["rightLeg"]["collection"];
+		current_shape.rleg_tattoo.overlay = j["tattoos"]["rightLeg"]["overlay"];
+		current_shape.rleg_tattoo.zone = j["tattoos"]["rightLeg"]["zone"];
+		current_shape.rleg_tattoo.update_group = j["tattoos"]["rightLeg"]["update_group"];
+
+		if (current_shape.rleg_tattoo.collection != 0) {
+			PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.rleg_tattoo.collection, current_shape.rleg_tattoo.overlay);
+		}
+	}
+
 	WAIT(1000);
 	CAM::DO_SCREEN_FADE_IN(2000);
 	SCREEN::ShowNotification("~g~Character loaded!");
