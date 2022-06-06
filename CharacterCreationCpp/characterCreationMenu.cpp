@@ -936,6 +936,8 @@ void update_customization() {
 				PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 4, 21, 0, 0);
 			}
 
+			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
+			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
 			tattoo_lock_out = true;
 			tattoo_lock_in = false;
 		}
