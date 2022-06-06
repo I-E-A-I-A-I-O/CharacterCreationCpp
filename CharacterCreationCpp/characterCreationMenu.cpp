@@ -800,44 +800,44 @@ void update_molesmenu() {
 void update_tattoomenu() {
 	menu.Title("Tattoos");
 
-	if (menu.IntOption("Head", selected_head_tat, 0, tattoos["ZONE_HEAD"].size() - 1)) {
+	if (menu.IntOption("Head", selected_head_tat, 0, tattoos["ZONE_HEAD"].size())) {
 		if (CHARACTERMENU::Data::creating) {
-			current_shape.head_tattoo = tattoos["ZONE_HEAD"].at(selected_head_tat);
+			current_shape.head_tattoo = selected_head_tat == 0 ? Tattoo() : tattoos["ZONE_HEAD"].at(selected_head_tat - (size_t)1);
 			refresh_tattoos();
 		}
 	}
 
-	if (menu.IntOption("Torso", selected_torso_tat, 0, tattoos["ZONE_TORSO"].size() - 1)) {
+	if (menu.IntOption("Torso", selected_torso_tat, 0, tattoos["ZONE_TORSO"].size())) {
 		if (CHARACTERMENU::Data::creating) {
-			current_shape.torso_tattoo = tattoos["ZONE_TORSO"].at(selected_torso_tat);
+			current_shape.torso_tattoo = selected_torso_tat == 0 ? Tattoo() : tattoos["ZONE_TORSO"].at(selected_torso_tat - (size_t)1);
 			refresh_tattoos();
 		}
 	}
 
-	if (menu.IntOption("Left arm", selected_larm_tat, 0, tattoos["ZONE_LEFT_ARM"].size() - 1)) {
+	if (menu.IntOption("Left arm", selected_larm_tat, 0, tattoos["ZONE_LEFT_ARM"].size())) {
 		if (CHARACTERMENU::Data::creating) {
-			current_shape.larm_tattoo = tattoos["ZONE_LEFT_ARM"].at(selected_larm_tat);
+			current_shape.larm_tattoo = selected_larm_tat == 0 ? Tattoo() : tattoos["ZONE_LEFT_ARM"].at(selected_larm_tat - (size_t)1);
 			refresh_tattoos();
 		}
 	}
 
-	if (menu.IntOption("Right arm", selected_rarm_tat, 0, tattoos["ZONE_RIGHT_ARM"].size() - 1)) {
+	if (menu.IntOption("Right arm", selected_rarm_tat, 0, tattoos["ZONE_RIGHT_ARM"].size())) {
 		if (CHARACTERMENU::Data::creating) {
-			current_shape.rarm_tattoo = tattoos["ZONE_RIGHT_ARM"].at(selected_rarm_tat);
+			current_shape.rarm_tattoo = selected_rarm_tat == 0 ? Tattoo() : tattoos["ZONE_RIGHT_ARM"].at(selected_rarm_tat - (size_t)1);
 			refresh_tattoos();
 		}
 	}
 
-	if (menu.IntOption("Left leg", selected_lleg_tat, 0, tattoos["ZONE_LEFT_LEG"].size() - 1)) {
+	if (menu.IntOption("Left leg", selected_lleg_tat, 0, tattoos["ZONE_LEFT_LEG"].size())) {
 		if (CHARACTERMENU::Data::creating) {
-			current_shape.lleg_tattoo = tattoos["ZONE_LEFT_LEG"].at(selected_lleg_tat);
+			current_shape.lleg_tattoo = selected_lleg_tat == 0 ? Tattoo() : tattoos["ZONE_LEFT_LEG"].at(selected_lleg_tat - (size_t)1);
 			refresh_tattoos();
 		}
 	}
 
-	if (menu.IntOption("Right leg", selected_rleg_tat, 0, tattoos["ZONE_RIGHT_LEG"].size() - 1)) {
+	if (menu.IntOption("Right leg", selected_rleg_tat, 0, tattoos["ZONE_RIGHT_LEG"].size())) {
 		if (CHARACTERMENU::Data::creating) {
-			current_shape.rleg_tattoo = tattoos["ZONE_RIGHT_LEG"].at(selected_rleg_tat);
+			current_shape.rleg_tattoo = selected_rleg_tat == 0 ? Tattoo() : tattoos["ZONE_RIGHT_LEG"].at(selected_rleg_tat - (size_t)1);
 			refresh_tattoos();
 		}
 	}
