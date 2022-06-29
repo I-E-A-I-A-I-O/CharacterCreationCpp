@@ -10,7 +10,12 @@
 #include "enums.h"
 #include "blip.h"
 #include "characterData.h"
+#include "toml.hpp"
+#include "controls.hpp"
 
+int GlobalData::interaction_key;
+int GlobalData::loadingmenu_key;
+int GlobalData::secondary_key;
 int GlobalData::PLAYER_ID;
 bool GlobalData::swapped = false;
 bool transisioning = false;
@@ -20,6 +25,23 @@ Hash to_model = 0x705E61F2;
 Blip creation_blip;
 Blip hospital_blip;
 OutInCoords current_shop = OutInCoords(Coords(0, 0, 0), Coords(0, 0, 0));
+
+void read_config() {
+	try
+	{
+		std::string filepath = "CharacterCreationData\\config.toml";
+		toml::table table = toml::parse_file(filepath);
+		GlobalData::interaction_key = table["controls"]["interaction_key"].value_or<int>(51);
+		GlobalData::loadingmenu_key = table["controls"]["loading_menu_key"].value_or<int>(316);
+		GlobalData::secondary_key = table["controls"]["secondary_key"].value_or<int>(52);
+	}
+	catch (const toml::parse_error& err)
+	{
+		GlobalData::loadingmenu_key = 316;
+		GlobalData::interaction_key = 51;
+		GlobalData::secondary_key = 52;
+	}
+}
 
 void lock_player() {
 	TASK::TASK_ACHIEVE_HEADING(GlobalData::PLAYER_ID, 270, 0);
@@ -47,21 +69,21 @@ void leave_creation() {
 
 void handle_creation_menu_opening() {
 	if (UTILS::can_open_creationmenu()) {
-		SCREEN::ShowHelpTextThisFrame_long("Press ~INPUT_CONTEXT~ to enter creation mode with MP Female.", "\nPress ~INPUT_CONTEXT_SECONDARY~ to enter creation mode with MP Male.", false);
+		SCREEN::ShowHelpTextThisFrame_long(std::string("Press ~").append(controlsNames[GlobalData::interaction_key]).append("~ to enter creation mode with MP Female.").c_str(), std::string("\nPress ~").append(controlsNames[GlobalData::secondary_key]).append("~ to enter creation mode with MP Male.").c_str(), false);
 
-		if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, GlobalData::interaction_key)) {
 			prepare_creation(false);
 		}
 
-		if (PAD::IS_CONTROL_JUST_PRESSED(0, 52)) {
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, GlobalData::secondary_key)) {
 			prepare_creation(true);
 		}
 	}
 
 	if (UTILS::can_open_hospitalmenu()) {
-		SCREEN::ShowHelpTextThisFrame("Press ~INPUT_CONTEXT~ to enter shape customization.", false);
+		SCREEN::ShowHelpTextThisFrame(std::string("Press ~").append(controlsNames[GlobalData::interaction_key]).append("~ to enter shape customization.").c_str(), false);
 
-		if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, GlobalData::interaction_key)) {
 			lock_player();
 			CHARACTERMENU::Data::mode = CHARACTERMENU::eMenuMode::shape;
 			CHARACTERMENU::Data::creating = true;
@@ -70,9 +92,9 @@ void handle_creation_menu_opening() {
 	}
 
 	if (UTILS::can_open_barbershopmenu()) {
-		SCREEN::ShowHelpTextThisFrame("Press ~INPUT_CONTEXT~ to enter cosmetic customization.", false);
+		SCREEN::ShowHelpTextThisFrame(std::string("Press ~").append(controlsNames[GlobalData::interaction_key]).append("~ to enter cosmetic customization.").c_str(), false);
 
-		if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, GlobalData::interaction_key)) {
 			lock_player();
 			CHARACTERMENU::Data::mode = CHARACTERMENU::eMenuMode::cosmetic;
 			CHARACTERMENU::Data::creating = true;
@@ -81,9 +103,9 @@ void handle_creation_menu_opening() {
 	}
 
 	if (UTILS::can_open_tattoomenu()) {
-		SCREEN::ShowHelpTextThisFrame("Press ~INPUT_CONTEXT~ to enter tattoo customization.", false);
+		SCREEN::ShowHelpTextThisFrame(std::string("Press ~").append(controlsNames[GlobalData::interaction_key]).append("~ to enter tattoo customization.").c_str(), false);
 
-		if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, GlobalData::interaction_key)) {
 			lock_player();
 			CHARACTERMENU::Data::mode = CHARACTERMENU::eMenuMode::tattoo;
 			CHARACTERMENU::Data::creating = true;
@@ -95,15 +117,15 @@ void handle_creation_menu_opening() {
 void handle_loading_menu_opening() {
 	if (!UTILS::can_open_loadingmenu()) {
 		if (LOADINGMENU::isOpen()) {
-			unlock_player();
+			//unlock_player();
 			LOADINGMENU::close();
 		}
 
 		return;
 	}
 
-	if (PAD::IS_CONTROL_JUST_PRESSED(0, 316)) {
-		lock_player();
+	if (PAD::IS_CONTROL_JUST_PRESSED(0, GlobalData::loadingmenu_key)) {
+		//lock_player();
 		LOADINGMENU::open();
 	}
 }
@@ -112,15 +134,15 @@ void handle_outfitmenu_open() {
 	if (!OUTFITMENU::Data::creating && !entering) {
 		if (!UTILS::can_open_outfitmenu(current_shop) || !UTILS::is_freemode_character()) return;
 
-		SCREEN::ShowHelpTextThisFrame_long("Press ~INPUT_CONTEXT~ to enter outfit creation.", "\nPress ~INPUT_CONTEXT_SECONDARY~ to edit the current outfit.", false);
+		SCREEN::ShowHelpTextThisFrame_long(std::string("Press ~").append(controlsNames[GlobalData::interaction_key]).append("~ to enter outfit creation.").c_str(), std::string("\nPress ~").append(controlsNames[GlobalData::secondary_key]).append("~ to edit the current outfit.").c_str(), false);
 
-		if (PAD::IS_CONTROL_JUST_PRESSED(0, 51)) {
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, GlobalData::interaction_key)) {
 			lock_player();
 			entering = true;
 			OUTFITMENU::Data::reset = true;
 		}
 
-		if (PAD::IS_CONTROL_JUST_PRESSED(0, 52)) {
+		if (PAD::IS_CONTROL_JUST_PRESSED(0, GlobalData::secondary_key)) {
 			lock_player();
 			entering = true;
 			OUTFITMENU::Data::reset = false;
@@ -140,6 +162,8 @@ void creation_tick() {
 		PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, 0, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, true);
 		current_character = CharacterData();
 		current_shape = ShapeData();
+		current_shape.shape_mix = 0.5f;
+		current_shape.skin_mix = 0.5f;
 		CAM::DO_SCREEN_FADE_IN(2000);
 		transisioning = false;
 		GlobalData::swapped = true;
@@ -220,6 +244,7 @@ int main() {
 	LOADINGMENU::Initialize();
 	CHARACTERMENU::Initialize();
 	OUTFITMENU::Initialize();
+	read_config();
 	creation_blip = BLIPS::Create(-1042.3564f, -2745.46924f, 20.36439f, eBlipSprite::BlipSpriteClothes, eBlipColor::BlipColorGreen, "Character Creation");
 	hospital_blip = BLIPS::Create(-453.2057f, -339.4345f, 33.3635f, eBlipSprite::BlipSpriteHospital, eBlipColor::BlipColorBlue, "Shape Customization");
 

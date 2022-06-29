@@ -15,6 +15,7 @@ std::vector<std::string> saved_characters;
 std::vector<std::string> saved_outfits;
 bool LOADINGMENU::Data::loaded = false;
 std::string LOADINGMENU::Data::last_loaded = "";
+
 typedef struct {
 	int shapeFirst, shapeSecond, shapeThird;
 	int skinFirst, skinSecond, skinThird;
@@ -23,11 +24,13 @@ typedef struct {
 
 void OnLoadingMain() {
 	lmenu.ReadSettings();
+	//set_animsets_in_memory(true);
 	AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"CONFIRM_BEEP", (char*)"HUD_MINI_GAME_SOUNDSET", true);
 }
 
 void OnLoadingExit() {
-	PLAYER::SET_PLAYER_CONTROL(0, 1, 0);
+	//set_animsets_in_memory(false);
+	//PLAYER::SET_PLAYER_CONTROL(0, 1, 0);
 }
 
 bool LOADINGMENU::isOpen() {
@@ -215,6 +218,25 @@ void LOADINGMENU::load_outfit(const std::string& outfit_name) {
 	}
 
 	SCREEN::ShowNotification("~g~Outfit loaded!");
+}
+
+
+void set_walking_style() {
+	if (current_shape.walking_style == 0) {
+		PED::RESET_PED_MOVEMENT_CLIPSET(GlobalData::PLAYER_ID, 0.0f);
+		return;
+	}
+
+	std::string dict = UTILS::get_gender() == eGender::GenderFemale ?
+		LOADINGMENU::walking_styles_female[current_shape.walking_style - 1] 
+		: 
+		LOADINGMENU::walking_styles_male[current_shape.walking_style - 1];
+	STREAMING::REQUEST_ANIM_SET(dict.c_str());
+
+	while (!STREAMING::HAS_ANIM_SET_LOADED(dict.c_str()))
+		WAIT(0);
+
+	PED::SET_PED_MOVEMENT_CLIPSET(GlobalData::PLAYER_ID, dict.c_str(), 1.0f);
 }
 
 void load_character(const std::string& character_name) {
@@ -431,6 +453,13 @@ void load_character(const std::string& character_name) {
 		if (current_shape.rleg_tattoo.collection != 0) {
 			PED::ADD_PED_DECORATION_FROM_HASHES(GlobalData::PLAYER_ID, current_shape.rleg_tattoo.collection, current_shape.rleg_tattoo.overlay);
 		}
+
+		if (j.find("style") != j.end()) {
+			current_shape.walking_style = j["style"]["walkingStyle"];
+			current_shape.face_expression = j["style"]["faceExpression"];
+			PED::SET_FACIAL_IDLE_ANIM_OVERRIDE(GlobalData::PLAYER_ID, LOADINGMENU::facial_expression_anims[current_shape.face_expression].c_str(), nullptr);
+			set_walking_style();
+		}
 	}
 
 	WAIT(1000);
@@ -475,6 +504,20 @@ void update_loadingmenu() {
 
 	if (lmenu.MenuOption("Outfits", "outfits", { "Load saved outfits." })) {
 		load_outfits();
+	}
+
+	if (lmenu.StringArray("Facial expression", LOADINGMENU::facial_expression_labels, current_shape.face_expression)) {
+		if (UTILS::is_freemode_character())
+			PED::SET_FACIAL_IDLE_ANIM_OVERRIDE(GlobalData::PLAYER_ID, LOADINGMENU::facial_expression_anims[current_shape.face_expression].c_str(), nullptr);
+		else
+			SCREEN::ShowNotification("~r~Not available for this character.");
+	}
+
+	if (lmenu.StringArray("Walking styles", LOADINGMENU::walking_style_labels, current_shape.walking_style)) {
+		if (UTILS::is_freemode_character())
+			set_walking_style();
+		else
+			SCREEN::ShowNotification("~r~Not available for this character.");
 	}
 
 	//lmenu.MenuOption("Current character", "charmenu", { "Save your current character and outfit." });

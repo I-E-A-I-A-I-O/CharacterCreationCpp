@@ -202,3 +202,12 @@ Vector3 UTILS::aroundCoords(float distance, Vector3 coords) {
 	MultiplyVector(ranXY, distance);
 	return AddVectors(coords, ranXY);
 }
+
+std::string UTILS::getLabel(std::string name) {
+	const char* label = HUD::GET_LABEL_TEXT_(name.c_str());
+
+	if (MISC::IS_STRING_NULL_OR_EMPTY(label))
+		label = "NULL";
+
+	return std::string(label);
+}

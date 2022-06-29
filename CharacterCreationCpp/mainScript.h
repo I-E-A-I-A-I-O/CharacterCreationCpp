@@ -5,6 +5,9 @@
 struct GlobalData {
 	static int PLAYER_ID;
 	static bool swapped;
+	static int interaction_key;
+	static int loadingmenu_key;
+	static int secondary_key;
 };
 
 typedef struct Coords {

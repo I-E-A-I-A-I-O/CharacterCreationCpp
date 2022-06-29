@@ -144,7 +144,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\Users\Jesus\Downloads\GTA Modding\tools\ScriptHookV_SDK_1.0.617.1a\inc;C:\Users\Jesus\Downloads\Cpp Libraries\nhlolman json\single_include;C:\Users\Jesus\Downloads\Cpp Libraries\simpleini;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Jesus\Downloads\Cpp Libraries\toml;C:\Users\Jesus\Downloads\GTA Modding\tools\ScriptHookV_SDK_1.0.617.1a\inc;C:\Users\Jesus\Downloads\Cpp Libraries\nhlolman json\single_include;C:\Users\Jesus\Downloads\Cpp Libraries\simpleini;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -160,6 +160,7 @@
     <ClInclude Include="blip.h" />
     <ClInclude Include="characterCreationMenu.h" />
     <ClInclude Include="characterData.h" />
+    <ClInclude Include="controls.hpp" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="InstructionalButton.h" />
     <ClInclude Include="loadingMenu.h" />

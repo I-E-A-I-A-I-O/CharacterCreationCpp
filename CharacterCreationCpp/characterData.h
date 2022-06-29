@@ -111,6 +111,8 @@ typedef struct {
 	float chinbone_width;
 	float chinbone_hole;
 	float neck_thickness;
+	int walking_style;
+	int face_expression;
 } ShapeData;
 
 extern CharacterData current_character;

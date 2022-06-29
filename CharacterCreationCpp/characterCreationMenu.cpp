@@ -25,6 +25,8 @@ int selected_lleg_tat;
 int selected_rleg_tat;
 bool tattoo_lock_out;
 bool tattoo_lock_in;
+std::map<std::string, int> dads;
+std::map<std::string, int> moms;
 
 std::map<std::string, std::vector<Tattoo>> tattoos = {
 	{ "ZONE_HEAD", std::vector<Tattoo>() },
@@ -35,9 +37,59 @@ std::map<std::string, std::vector<Tattoo>> tattoos = {
 	{ "ZONE_TORSO", std::vector<Tattoo>() }
 };
 
+void fix_heritage_indexes() {
+	bool found = false;
+
+	for (const auto& items : dads) {
+		found = items.second == current_shape.shape_father;
+
+		if (found) break;
+	}
+
+	if (!found)
+		current_shape.shape_father = dads.begin()->second;
+
+	for (const auto& items : moms) {
+		found = items.second == current_shape.shape_mother;
+
+		if (found) break;
+	}
+
+	if (!found)
+		current_shape.shape_mother = moms.begin()->second;
+
+	if (current_shape.shape_mix != current_shape.skin_mix)
+		current_shape.skin_mix = current_shape.shape_mix;
+}
+
+void addHeritage(std::map<std::string, int>& list, int index, std::string prefix) {
+	size_t base_index = list.size();
+	int base_ped = PED::GET_PED_HEAD_BLEND_FIRST_INDEX(index);
+
+	for (int i = 0; i < PED::GET_PED_HEAD_BLEND_NUM_HEADS(index); i++) {
+		std::string label = prefix + std::to_string(i);//HUD::GET_LABEL_TEXT_(prefix.append(std::to_string(i)).c_str());
+
+		/*if (MISC::IS_STRING_NULL_OR_EMPTY(label) || label == "NULL")
+			label = std::to_string(base_index + i).c_str();*/
+
+		list[label] = base_ped + i;
+	}
+}
+
+void addParents() {
+	dads.clear();
+	moms.clear();
+	addHeritage(dads, 0, "male_");
+	addHeritage(dads, 2, "special_male_");
+	addHeritage(moms, 1, "female_");
+	addHeritage(moms, 3, "special_female_");
+}
+
 void OnMain() {
 	face_camera = CAM::CREATE_CAM("DEFAULT_SCRIPTED_CAMERA", 0);
 	menu.ReadSettings();
+	addParents();
+	fix_heritage_indexes();
 	AUDIO::PLAY_SOUND_FRONTEND(-1, (char*)"CONFIRM_BEEP", (char*)"HUD_MINI_GAME_SOUNDSET", true);
 }
 
@@ -50,8 +102,12 @@ void reset_items() {
 	selected_rarm_tat = 0;
 	selected_lleg_tat = 0;
 	selected_rleg_tat = 0;
-
-	if (CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::all) current_shape = ShapeData();
+	//
+	/*if (CHARACTERMENU::Data::mode == CHARACTERMENU::eMenuMode::all) {
+		current_shape = ShapeData();
+		current_shape.shape_mix = 0.5f;
+		current_shape.skin_mix = 0.5f;
+	}*/
 }
 
 void reset_tattoo_lists() {
@@ -257,19 +313,24 @@ void save_values() {
 	j["tattoos"]["leftLeg"]["overlay"] = current_shape.lleg_tattoo.overlay;
 	j["tattoos"]["leftLeg"]["zone"] = current_shape.lleg_tattoo.zone;
 	j["tattoos"]["leftLeg"]["update_group"] = current_shape.lleg_tattoo.update_group;
+	j["style"]["faceExpression"] = current_shape.face_expression;
+	j["style"]["walkingStyle"] = current_shape.walking_style;
 	std::ofstream o(filepath);
 	o << std::setw(4) << j << std::endl;
 	SCREEN::ShowNotification("~g~Character saved!");
 }
 
-void facecam_start()
+void facecam_start(bool offset)
 {
 	Hash player_model = ENTITY::GET_ENTITY_MODEL(GlobalData::PLAYER_ID);
 	Vector3 dimensions = Vector3();
 	Vector3 ignore = Vector3();
 	Vector3 cam_offset = Vector3();
 	cam_offset.x = 0.1f;
-	//cam_offset.y = 0.4f;
+
+	if (offset)
+		cam_offset.y = -1.6f;
+
 	cam_offset.y = 0.5f;
 	Vector3 bone_coords = PED::GET_PED_BONE_COORDS(GlobalData::PLAYER_ID, eBone::SKEL_Head, cam_offset);
 	Vector3 cam_look_coords = Vector3();
@@ -279,6 +340,10 @@ void facecam_start()
 	Vector3 rear_position = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(GlobalData::PLAYER_ID, dimensions);
 	cam_look_coords.x = rear_position.x;
 	cam_look_coords.y = rear_position.y;
+
+	if (offset)
+		cam_look_coords.y -= 0.4f;
+
 	cam_look_coords.z = rear_position.z + 0.7f;
 	CAM::SET_CAM_COORD(face_camera, bone_coords);
 	CAM::POINT_CAM_AT_COORD(face_camera, cam_look_coords);
@@ -312,41 +377,10 @@ void update_mainmenu() {
 void update_shapemenu() {
 	menu.Title("Shape");
 	menu.Subtitle("Customize your face features.");
-
-	if (menu.IntOption("Shape mother", current_shape.shape_mother, 0, 45)) {
-		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
-		}
-	}
-
-	if (menu.IntOption("Shape father", current_shape.shape_father, 0, 45)) {
-		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
-		}
-	}
-
-	if (menu.IntOption("Skin mother", current_shape.skin_mother, 0, 45)) {
-		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
-		}
-	}
-
-	if (menu.IntOption("Skin father", current_shape.skin_father, 0, 45)) {
-		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
-		}
-	}
-
-	if (menu.FloatOption("Shape mix", current_shape.shape_mix, 0.00f, 1.00f, 0.01f, { "Set which parent head shape has more influence over your ped's head shape. Values go from Mother to Father." })) {
-		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
-		}
-	}
-
-	if (menu.FloatOption("Skin mix", current_shape.skin_mix, 0.00f, 1.00f, 0.01f, { "Set which parent skin color has more influence over your ped's skin color. Values go from Mother to Father." })) {
-		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
-		}
+	
+	if (menu.MenuOption("Heritage", "inheritancemenu", { "Select your character{s parents." })) {
+		facecam_start(true);
+		face_lock = true;
 	}
 
 	if (menu.FloatOption("Nose width", current_shape.nose_width, -1.0f, 1.0f)) {
@@ -863,57 +897,57 @@ void update_customization() {
 		}
 
 		if (menu.MenuOption("Eyebrows", "eyebrowmenu", { "Change your eyebrows." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 
 		if (menu.MenuOption("Beard", "beardmenu", { "Change your beard." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 
 		if (menu.MenuOption("Chest Hair", "chestmenu", { "Change your chest hair." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 
 		if (menu.MenuOption("Blush", "blushmenu", { "Change your blush." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 
 		if (menu.MenuOption("Lipstick", "lipstickmenu", { "Change your lipstick." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 
 		if (menu.MenuOption("Blemish", "blemishmenu", { "Change your blemish." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 
 		if (menu.MenuOption("Age", "agemenu", { "Change your age." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 
 		if (menu.MenuOption("Makeup", "makeupmenu", { "Change your makeup." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 
 		if (menu.MenuOption("Complexion", "complexmenu", { "Change your complexion." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 
 		if (menu.MenuOption("Sun Damage", "sunmenu", { "Change your sun damage." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 
 		if (menu.MenuOption("Moles & Freckles", "molesmenu", { "Change your moles and freckles." })) {
-			facecam_start();
+			facecam_start(false);
 			face_lock = true;
 		}
 	}
@@ -984,6 +1018,134 @@ void restore_outfit() {
 	tattoo_lock_in = true;
 }
 
+std::string getName(bool mom) {
+	if (mom) {
+		for (const auto& items : moms) {
+			if (current_shape.shape_mother == items.second) return items.first;
+		}
+	}
+	else {
+		for (const auto& items : dads) {
+			if (current_shape.shape_father == items.second) return items.first;
+		}
+	}
+}
+
+void mom_onright() {
+	auto it = moms.begin();
+
+	do {
+		auto it2 = std::next(it);
+
+		if (current_shape.shape_mother == it->second) {
+			current_shape.shape_mother = it2->second;
+			current_shape.skin_mother = it2->second;
+			break;
+		}
+
+		it = it2;
+	} while (it != std::prev(moms.end()));
+
+	PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
+}
+
+void mom_onleft() {
+	auto it = moms.end();
+
+	do {
+		auto it2 = std::prev(it);
+
+		if (current_shape.shape_mother == it->second) {
+			current_shape.shape_mother = it2->second;
+			current_shape.skin_mother = it2->second;
+			break;
+		}
+
+		it = it2;
+	} while (it != moms.begin());
+
+	PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
+}
+
+void dad_onright() {
+	auto it = dads.begin();
+
+	do {
+		auto it2 = std::next(it);
+
+		if (current_shape.shape_father == it->second) {
+			current_shape.shape_father = it2->second;
+			current_shape.skin_father = it2->second;
+			break;
+		}
+
+		it = it2;
+	} while (it != std::prev(dads.end()));
+
+	PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
+}
+
+void dad_onleft() {
+	auto it = dads.end();
+
+	do {
+		auto it2 = std::prev(it);
+
+		if (current_shape.shape_father == it->second) {
+			current_shape.shape_father = it2->second;
+			current_shape.skin_father = it2->second;
+			break;
+		}
+
+		it = it2;
+	} while (it != dads.begin());
+
+	PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
+}
+
+void update_inheritancemenu() {
+	menu.Title("Heritage");
+	menu.Subtitle("Select your character's parents");
+	std::vector<std::string> mom_extras, dad_extras;
+	mom_extras.push_back(
+		menu.SpritePrefix +
+		"char_creator_portraits" +
+		" " +
+		getName(true) +
+		" " +
+		"W" +
+		std::to_string(100) +
+		"H" +
+		std::to_string(100)
+	);
+	dad_extras.push_back(
+		menu.SpritePrefix +
+		"char_creator_portraits" +
+		" " +
+		getName(false) +
+		" " +
+		"W" +
+		std::to_string(100) +
+		"H" +
+		std::to_string(100)
+	);
+
+	menu.OptionPlus("Mom", mom_extras, nullptr, mom_onright, mom_onleft, "Mother", { UTILS::getLabel(getName(true)) });
+	menu.OptionPlus("Dad", dad_extras, nullptr, dad_onright, dad_onleft, "Father", { UTILS::getLabel(getName(false)) });
+
+	if (menu.FloatOption("Resemblance", current_shape.shape_mix, 0.00f, 1.00f, 0.01f, { "Set which parent head shape has more influence over your ped's head shape. Values go from Mother to Father." })) {
+		if (CHARACTERMENU::Data::creating) {
+			PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
+		}
+	}
+
+	if (menu.FloatOption("Skin tone", current_shape.skin_mix, 0.00f, 1.00f, 0.01f, { "Set which parent skin color has more influence over your ped's skin color. Values go from Mother to Father." })) {
+		if (CHARACTERMENU::Data::creating) {
+			PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
+		}
+	}
+}
+
 void CHARACTERMENU::OnTick() {
 	menu.CheckKeys();
 	face_lock = false;
@@ -1048,6 +1210,10 @@ void CHARACTERMENU::OnTick() {
 	else if (menu.CurrentMenu("tattoomenu")) {
 		update_tattoomenu();
 		tattoo_lock_out = true;
+	}
+	else if (menu.CurrentMenu("inheritancemenu")) {
+		update_inheritancemenu();
+		face_lock = true;
 	}
 
 	if (!face_lock) facecam_end();

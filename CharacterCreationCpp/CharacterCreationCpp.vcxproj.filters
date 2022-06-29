@@ -72,6 +72,9 @@
     <ClInclude Include="characterData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="controls.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
