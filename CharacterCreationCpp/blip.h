@@ -1,6 +1,6 @@
 #pragma once
 
-#include "natives.h"
+#include "natives.hpp"
 #include "enums.h"
 
 namespace BLIPS

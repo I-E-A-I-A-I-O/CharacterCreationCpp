@@ -42,22 +42,23 @@ inline std::vector<OutInCoords> clothes_coords = {
 	OutInCoords(Coords(-2.020693f, 6517.645f, 30.48172f), Coords(11.79138f, 6514.016f, 30.87784f))
 };
 
-inline std::vector<Coords> barber_coords = {
-	Coords(-31.3666f, -145.0191f, 56.0639f),
-	Coords(132.3541f, -1712.453f, 28.29168f),
-	Coords(1204.733f, -470.5503f, 65.25225f),
-	Coords(-824.4573f, -188.7151f, 36.61749f),
-	Coords(1934.078f, 3724.152f, 31.8054f),
-	Coords(-282.6994f, 6233.681f, 30.48855f)
+inline std::vector<OutInCoords> barber_coords = {
+	OutInCoords(Coords(-31.3666f, -145.0191f, 56.0639f), Coords(-33.84, -153.58, 57.08)),
+	OutInCoords(Coords(132.3541f, -1712.453f, 28.29168f), Coords(137.76, -1707.37, 29.29)),
+	OutInCoords(Coords(1204.733f, -470.5503f, 65.25225f), Coords(1212.94, -473.38, 66.21)),
+	OutInCoords(Coords(-824.4573f, -188.7151f, 36.61749f), Coords(-813.04, -183.01, 37.57)),
+	OutInCoords(Coords(1934.078f, 3724.152f, 31.8054f), Coords(1932.14, 3731.45, 32.85)),
+	OutInCoords(Coords(-282.6994f, 6233.681f, 30.48855f), Coords(-277.72, 6227.02, 31.70)),
+	OutInCoords(Coords(-1291.41, -1116.81, 6.63), Coords(-1282.16, -1117.40, 6.99))
 };
 
-inline std::vector<Coords> tattoo_coords = {
-	Coords(-1155.941f, -1422.426f, 3.773431f),
-	Coords(1320.64f, -1648.719f, 51.15056f),
-	Coords(320.9127f, 176.4153f, 102.6271f),
-	Coords(-3166.484f, 1073.67f, 19.84789f),
-	Coords(1858.272f, 3747.994f, 32.08252f),
-	Coords(-288.3917f, 6200.439f, 30.46353f)
+inline std::vector<OutInCoords> tattoo_coords = {
+	OutInCoords(Coords(-1155.941f, -1422.426f, 3.773431f), Coords(-1155.47, -1426.5, 4.95)),
+	OutInCoords(Coords(1320.64f, -1648.719f, 51.15056f), Coords(1321.75, -1653.29, 52.28)),
+	OutInCoords(Coords(320.9127f, 176.4153f, 102.6271f), Coords(323.87, 180.37, 103.59)),
+	OutInCoords(Coords(-3166.484f, 1073.67f, 19.84789f), Coords(-3168.99, 1077.18, 20.83)),
+	OutInCoords(Coords(1858.272f, 3747.994f, 32.08252f), Coords(1864.61, 3747.04, 33.03)),
+	OutInCoords(Coords(-288.3917f, 6200.439f, 30.46353f), Coords(-294.3, 6149.36, 31.49))
 };
 
 void MainScriptMain();

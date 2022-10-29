@@ -1,6 +1,8 @@
 #include "pch.h"
+
 #include "utils.h"
-#include "natives.h"
+
+#include "natives.hpp"
 #include "screen.h"
 #include <cmath>
 #include <math.h>
@@ -79,7 +81,11 @@ bool UTILS::can_open_creationmenu() {
 	creation_coords.y = -2745.46924f;
 	creation_coords.z = 20.36439f;
 
-	if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), creation_coords, 5)) return !is_busy();
+	if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), creation_coords, 5))
+	{
+		return !is_busy();
+	}
+
 	return false;
 }
 
@@ -90,24 +96,32 @@ bool UTILS::can_open_hospitalmenu() {
 		creation_coords.y = -339.4345f;
 		creation_coords.z = 33.3635f;
 
-		if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), creation_coords, 5)) return !is_busy();
+		if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), creation_coords, 5))
+		{
+			return !is_busy();
+		}
 	}
+
 	return false;
 }
 
-bool UTILS::can_open_barbershopmenu() {
-	for (auto& coords : barber_coords) {
-		Vector3 shop_coords = Vector3();
-		shop_coords.x = coords.x;
-		shop_coords.y = coords.y;
-		shop_coords.z = coords.z;
+bool UTILS::can_open_barbershopmenu(OutInCoords& p_active_location) {
+	if (is_freemode_character())
+	{
+		for (auto& coords : barber_coords) {
+			Vector3 shop_coords = Vector3();
+			shop_coords.x = coords.out_coord.x;
+			shop_coords.y = coords.out_coord.y;
+			shop_coords.z = coords.out_coord.z;
 
-		if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), shop_coords, 5)) {
-			if (is_busy()) {
-				return false;
-			}
-			else {
-				return true;
+			if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), shop_coords, 5)) {
+				if (is_busy()) {
+					return false;
+				}
+				else {
+					p_active_location = coords;
+					return true;
+				}
 			}
 		}
 	}
@@ -115,19 +129,23 @@ bool UTILS::can_open_barbershopmenu() {
 	return false;
 }
 
-bool UTILS::can_open_tattoomenu() {
-	for (auto& coords : tattoo_coords) {
-		Vector3 shop_coords = Vector3();
-		shop_coords.x = coords.x;
-		shop_coords.y = coords.y;
-		shop_coords.z = coords.z;
+bool UTILS::can_open_tattoomenu(OutInCoords& p_active_location) {
+	if (is_freemode_character())
+	{
+		for (auto& coords : tattoo_coords) {
+			Vector3 shop_coords = Vector3();
+			shop_coords.x = coords.out_coord.x;
+			shop_coords.y = coords.out_coord.y;
+			shop_coords.z = coords.out_coord.z;
 
-		if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), shop_coords, 5)) {
-			if (is_busy()) {
-				return false;
-			}
-			else {
-				return true;
+			if (isInRange(ENTITY::GET_ENTITY_COORDS(GlobalData::PLAYER_ID, 1), shop_coords, 5)) {
+				if (is_busy()) {
+					return false;
+				}
+				else {
+					p_active_location = coords;
+					return true;
+				}
 			}
 		}
 	}
@@ -204,7 +222,7 @@ Vector3 UTILS::aroundCoords(float distance, Vector3 coords) {
 }
 
 std::string UTILS::getLabel(std::string name) {
-	const char* label = HUD::GET_LABEL_TEXT_(name.c_str());
+	const char* label = HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION(name.c_str());
 
 	if (MISC::IS_STRING_NULL_OR_EMPTY(label))
 		label = "NULL";

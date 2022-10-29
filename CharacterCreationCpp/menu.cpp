@@ -6,7 +6,7 @@
 #include <utility>
 
 #include <main.h>
-#include <natives.h>
+#include <natives.hpp>
 #include <enums.h>
 #include "menucontrols.h"
 #include "menuutils.h"
@@ -150,8 +150,8 @@ void Menu::Title(const std::string& title, int textureHandle, float customSize) 
     float safeOffsetX = safeOffset;
 
     float titleX = menuX;
-    float ar = GRAPHICS::GET_ASPECT_RATIO_(FALSE);
-    float ar_true = GRAPHICS::GET_ASPECT_RATIO_(TRUE);
+    float ar = GRAPHICS::GET_ASPECT_RATIO(FALSE);
+    float ar_true = GRAPHICS::GET_ASPECT_RATIO(TRUE);
 
     // game allows max 16/9 ratio for UI elements
     if (ar > 16.0f / 9.0f) {
@@ -174,8 +174,8 @@ void Menu::Title(const std::string& title, int textureHandle, float customSize) 
 
     // We don't worry about depth since SHV draws these on top of the game anyway
     drawTexture(textureHandle, 0, -9999, 60,                                     // handle, index, depth, time
-        drawWidth, titleHeight / GRAPHICS::GET_ASPECT_RATIO_(FALSE), 0.5f, 0.5f, // width, height, origin x, origin y
-        titleX + safeOffsetX, titley + safeOffset, 0.0f, GRAPHICS::GET_ASPECT_RATIO_(FALSE), 1.0f, 1.0f, 1.0f, 1.0f);
+        drawWidth, titleHeight / GRAPHICS::GET_ASPECT_RATIO(FALSE), 0.5f, 0.5f, // width, height, origin x, origin y
+        titleX + safeOffsetX, titley + safeOffset, 0.0f, GRAPHICS::GET_ASPECT_RATIO(FALSE), 1.0f, 1.0f, 1.0f, 1.0f);
     
     totalHeight = titleHeight;
     headerHeight = titleHeight;
@@ -449,7 +449,7 @@ bool Menu::BoolOption(const std::string& option, bool &var, const std::vector<st
 
     if (doDraw) {
         int resX, resY;
-        GRAPHICS::GET_ACTIVE_SCREEN_RESOLUTION_(&resX, &resY);
+        GRAPHICS::GET_ACTUAL_SCREEN_RESOLUTION(&resX, &resY);
         float ratio = static_cast<float>(resX) / static_cast<float>(resY);
         foregroundSpriteCalls.push_back(
             [=]() { drawSprite("commonmenu", tickBoxTexture,
@@ -554,10 +554,10 @@ void Menu::drawInstructionalButtons() {
     instructionalButtonsScaleform.CallFunction("CLEAR_ALL");
     instructionalButtonsScaleform.CallFunction("TOGGLE_MOUSE_BUTTONS", { 0 });
     instructionalButtonsScaleform.CallFunction("CREATE_CONTAINER");
-    instructionalButtonsScaleform.CallFunction("SET_DATA_SLOT", { 0, std::string(PAD::GET_CONTROL_INSTRUCTIONAL_BUTTON(2, ControlPhoneSelect, 0)), std::string(HUD::GET_LABEL_TEXT_("HUD_INPUT2")) });
-    instructionalButtonsScaleform.CallFunction("SET_DATA_SLOT", { 1, std::string(PAD::GET_CONTROL_INSTRUCTIONAL_BUTTON(2, ControlPhoneCancel, 0)), std::string(HUD::GET_LABEL_TEXT_("HUD_INPUT3")) });
-    instructionalButtonsScaleform.CallFunction("SET_DATA_SLOT", { 2, std::string(PAD::GET_CONTROL_INSTRUCTIONAL_BUTTON(2, ControlPhoneUp, 0)), std::string("Next option") });
-    instructionalButtonsScaleform.CallFunction("SET_DATA_SLOT", { 3, std::string(PAD::GET_CONTROL_INSTRUCTIONAL_BUTTON(2, ControlPhoneDown, 0)), std::string("Previous option") });
+    instructionalButtonsScaleform.CallFunction("SET_DATA_SLOT", { 0, std::string(PAD::GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(2, ControlPhoneSelect, 0)), std::string(HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION("HUD_INPUT2")) });
+    instructionalButtonsScaleform.CallFunction("SET_DATA_SLOT", { 1, std::string(PAD::GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(2, ControlPhoneCancel, 0)), std::string(HUD::GET_FILENAME_FOR_AUDIO_CONVERSATION("HUD_INPUT3")) });
+    instructionalButtonsScaleform.CallFunction("SET_DATA_SLOT", { 2, std::string(PAD::GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(2, ControlPhoneUp, 0)), std::string("Next option") });
+    instructionalButtonsScaleform.CallFunction("SET_DATA_SLOT", { 3, std::string(PAD::GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(2, ControlPhoneDown, 0)), std::string("Previous option") });
 
     //int count = 2;
     //for (const auto& button : instructionalButtons) {
@@ -697,13 +697,14 @@ void Menu::EndMenu() {
  */
 void Menu::CheckKeys() {
     if (!cheatString.empty()) {
-        if (MISC::HAS_CHEAT_STRING_JUST_BEEN_ENTERED_(MISC::GET_HASH_KEY((char*)cheatString.c_str()))) {
+        if (MISC::HAS_PC_CHEAT_WITH_HASH_BEEN_ACTIVATED(MISC::GET_HASH_KEY((char*)cheatString.c_str()))) {
             OpenMenu();
             controls.Update();
             optionpress = false;
             return;
         }
     }
+
     controls.Update();
     optionpress = false;
 
@@ -735,7 +736,7 @@ void Menu::CheckKeys() {
     }
 
     for (unsigned i = 1; i < menuTimeDelays.size(); ++i) {
-        if (controls.IsKeyDownFor(MenuControls::MenuUp, (i+1) * menuTimeRepeat) || controls.IsControlDownFor(ControlFrontendUp, (i + 1) * menuTimeRepeat) ||
+        if (controls.IsKeyDownFor(MenuControls::MenuUp, (i + 1) * menuTimeRepeat) || controls.IsControlDownFor(ControlFrontendUp, (i + 1) * menuTimeRepeat) ||
             controls.IsKeyDownFor(MenuControls::MenuDown, (i + 1) * menuTimeRepeat) || controls.IsControlDownFor(ControlFrontendDown, (i + 1) * menuTimeRepeat) ||
             controls.IsKeyDownFor(MenuControls::MenuLeft, (i + 1) * menuTimeRepeat) || controls.IsControlDownFor(ControlFrontendLeft, (i + 1) * menuTimeRepeat) ||
             controls.IsKeyDownFor(MenuControls::MenuRight, (i + 1) * menuTimeRepeat) || controls.IsControlDownFor(ControlFrontendRight, (i + 1) * menuTimeRepeat)) {
@@ -781,11 +782,11 @@ bool Menu::IsThisOpen() {
  * Section Draw/Utils
  */
 float Menu::getStringWidth(const std::string& text, float scale, int font) {
-    HUD::BEGIN_TEXT_COMMAND_GET_WIDTH_("STRING");
+    HUD::BEGIN_TEXT_COMMAND_GET_SCREEN_WIDTH_OF_DISPLAY_TEXT("STRING");
     HUD::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text.c_str());
     HUD::SET_TEXT_FONT( font);
     HUD::SET_TEXT_SCALE( scale, scale);
-    return HUD::END_TEXT_COMMAND_GET_WIDTH_(true);
+    return HUD::END_TEXT_COMMAND_GET_SCREEN_WIDTH_OF_DISPLAY_TEXT(true);
 }
 
 std::vector<std::string> Menu::splitString(float maxWidth, const std::string& details, float scale, int font) {
@@ -889,7 +890,7 @@ void Menu::drawOptionPlusImage(const std::string& extra, float &finalHeight) {
     float safeOffset = (1.0f - safeZone) * 0.5f;
     float safeOffsetX = safeOffset;
 
-    float ar = GRAPHICS::GET_ASPECT_RATIO_(FALSE);
+    float ar = GRAPHICS::GET_ASPECT_RATIO(FALSE);
 
     // game allows max 16/9 ratio for UI elements
     if (ar > 16.0f / 9.0f) {
@@ -898,7 +899,7 @@ void Menu::drawOptionPlusImage(const std::string& extra, float &finalHeight) {
 
 
     // handle multi-monitor setups
-    float ar_true = GRAPHICS::GET_ASPECT_RATIO_(TRUE);
+    float ar_true = GRAPHICS::GET_ASPECT_RATIO(TRUE);
     if (ar_true > ar) {
         if (ar > 16.0f / 9.0f) {
             imgXpos -= (ar - 16.0f / 9.0f) / (2.0f * ar);
@@ -935,7 +936,7 @@ void Menu::drawOptionPlusSprite(const std::string& extra, float &finalHeight) {
         return;
     }
     float drawWidth = menuWidth - 2.0f * menuTextMargin;
-    float drawHeight = static_cast<float>(imgHeight) * (drawWidth / static_cast<float>(imgWidth)) * GRAPHICS::GET_ASPECT_RATIO_(FALSE);
+    float drawHeight = static_cast<float>(imgHeight) * (drawWidth / static_cast<float>(imgWidth)) * GRAPHICS::GET_ASPECT_RATIO(FALSE);
     float imgXpos = menuX + menuWidth / 2.0f + drawWidth / 2.0f + menuTextMargin;
     float imgYpos = finalHeight + drawHeight/2.0f + (menuY + headerHeight) + menuTextMargin;
             
@@ -1042,7 +1043,7 @@ void Menu::drawOptionValue(const std::string& printVar, bool highlighted, int it
 
         if (doDraw) {
             int resX, resY;
-            GRAPHICS::GET_ACTIVE_SCREEN_RESOLUTION_(&resX, &resY);
+            GRAPHICS::GET_ACTUAL_SCREEN_RESOLUTION(&resX, &resY);
             float ratio = static_cast<float>(resX) / static_cast<float>(resY);
             foregroundSpriteCalls.push_back(
                 [=]() {
@@ -1194,7 +1195,7 @@ void Menu::processMenuNav() {
         PAD::IS_DISABLED_CONTROL_PRESSED(0, controls.ControllerButton1) &&
         PAD::IS_DISABLED_CONTROL_JUST_PRESSED(0, controls.ControllerButton2)) {
         if (menulevel == 0) {
-            OpenMenu();
+            //OpenMenu();
         }
         else {
             CloseMenu();
@@ -1260,8 +1261,8 @@ void Menu::processMenuNav() {
 
 
 void Menu::updateScreenSize() {
-    aspectR = (16.0f / 9.0f)/GRAPHICS::GET_ASPECT_RATIO_(FALSE);
-    menuWidth = menuWidthOriginal*aspectR;
+    aspectR = (16.0f / 9.0f) / GRAPHICS::GET_ASPECT_RATIO(FALSE);
+    menuWidth = menuWidthOriginal * aspectR;
 }
 
 }

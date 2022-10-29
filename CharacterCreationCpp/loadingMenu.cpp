@@ -1,9 +1,11 @@
 #include "pch.h"
+
 #include "loadingmenu.h"
-#include "natives.h"
+
+#include "natives.hpp"
 #include "utils.h"
 #include "mainScript.h"
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 #include "screen.h"
 #include "characterData.h"
 #include <filesystem>
@@ -88,11 +90,13 @@ void LOADINGMENU::load_outfit(const std::string& outfit_name) {
 	std::ifstream i(filepath);
 	i >> j;
 	i.close();
-	current_character.outfit_selected_hairstyle = j["hair"]["style"];
+
+	/*current_character.outfit_selected_hairstyle = j["hair"]["style"];
 	current_character.outfit_selected_haircolor = j["hair"]["color"];
 	current_character.outfit_selected_highlight = j["hair"]["highlight"];
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
-	PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
+	PED::SET_PED_HAIR_TINT(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
+	
 	current_character.outfit_has_blush = j["blush"]["enabled"];
 
 	if (current_character.outfit_has_blush) {
@@ -100,7 +104,7 @@ void LOADINGMENU::load_outfit(const std::string& outfit_name) {
 		current_character.outfit_selected_blush_color = j["blush"]["color"];
 		current_character.outfit_selected_blush_opacity = j["blush"]["opacity"];
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, current_character.outfit_selected_blush_type, current_character.outfit_selected_blush_opacity);
-		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
+		PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
 	}
 	else {
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, 255, 1);
@@ -113,7 +117,7 @@ void LOADINGMENU::load_outfit(const std::string& outfit_name) {
 		current_character.outfit_selected_lipstick_color = j["lipstick"]["color"];
 		current_character.outfit_selected_lipstick_opacity = j["lipstick"]["opacity"];
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, current_character.outfit_selected_lipstick_type, current_character.outfit_selected_lipstick_opacity);
-		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
+		PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
 	}
 	else {
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, 255, 1);
@@ -126,11 +130,11 @@ void LOADINGMENU::load_outfit(const std::string& outfit_name) {
 		current_character.outfit_selected_makeup_color = j["makeup"]["color"];
 		current_character.outfit_selected_makeup_opacity = j["makeup"]["opacity"];
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, current_character.outfit_selected_makeup_type, current_character.outfit_selected_makeup_opacity);
-		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
+		PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
 	}
 	else {
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, 255, 1);
-	}
+	}*/
 
 	current_character.mask_drawable = j["mask"]["drawable"];
 	current_character.mask_texture = j["mask"]["texture"];
@@ -159,7 +163,7 @@ void LOADINGMENU::load_outfit(const std::string& outfit_name) {
 	current_character.torso_drawable = j["torso"]["drawable"];
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 3, current_character.torso_drawable, 0, 0);
 	current_character.eye_color = j["eyecolor"];
-	PED::SET_PED_EYE_COLOR_(GlobalData::PLAYER_ID, current_character.eye_color);
+	PED::SET_HEAD_BLEND_EYE_COLOR(GlobalData::PLAYER_ID, current_character.eye_color);
 	current_character.badge_drawable = j["badge"];
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 10, current_character.badge_drawable, 0, 0);
 	current_character.has_hat = j["hat"]["enabled"];
@@ -242,18 +246,21 @@ void set_walking_style() {
 void load_character(const std::string& character_name) {
 	CAM::DO_SCREEN_FADE_OUT(2000);
 	WAIT(4000);
+
 	nlohmann::json j;
 	std::string filepath = "CharacterCreationData\\Characters\\";
 	filepath = filepath.append(character_name).append(".json");
 	std::ifstream i(filepath);
 	i >> j;
 	i.close();
+
 	Hash model = j["model"];
 	UTILS::loadModel(model);
 	PLAYER::SET_PLAYER_MODEL(0, model);
 	UTILS::unloadModel(model);
 	GlobalData::PLAYER_ID = PLAYER::PLAYER_PED_ID();
 	GlobalData::swapped = true;
+
 	current_character = CharacterData();
 	current_shape.shape_mother = j["features"]["shape_mother"];
 	current_shape.shape_father = j["features"]["shape_father"];
@@ -261,59 +268,62 @@ void load_character(const std::string& character_name) {
 	current_shape.skin_father = j["features"]["skin_father"];
 	current_shape.shape_mix = j["features"]["shape_mix"];
 	current_shape.skin_mix = j["features"]["skin_mix"];
+
 	PED::SET_PED_HEAD_BLEND_DATA(GlobalData::PLAYER_ID, current_shape.shape_mother, current_shape.shape_father, 0, current_shape.skin_mother, current_shape.skin_father, 0, current_shape.shape_mix, current_shape.skin_mix, 0, 0);
 	current_shape.nose_width = j["features"]["nose_width"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 0, current_shape.nose_width);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 0, current_shape.nose_width);
 	current_shape.nose_peak_height = j["features"]["nose_peak_height"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 1, current_shape.nose_peak_height);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 1, current_shape.nose_peak_height);
 	current_shape.nose_peak_length = j["features"]["nose_peak_length"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 2, current_shape.nose_peak_length);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 2, current_shape.nose_peak_length);
 	current_shape.nose_bone_height = j["features"]["nose_bone_height"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 3, current_shape.nose_bone_height);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 3, current_shape.nose_bone_height);
 	current_shape.nose_peak_lowering = j["features"]["nose_peak_lowering"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 4, current_shape.nose_peak_lowering);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 4, current_shape.nose_peak_lowering);
 	current_shape.nose_bone_twist = j["features"]["nose_bone_twist"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 5, current_shape.nose_bone_twist);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 5, current_shape.nose_bone_twist);
 	current_shape.eyebrow_height = j["features"]["eyebrow_height"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 6, current_shape.eyebrow_height);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 6, current_shape.eyebrow_height);
 	current_shape.eyebrow_forward = j["features"]["eyebrow_forward"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 7, current_shape.eyebrow_forward);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 7, current_shape.eyebrow_forward);
 	current_shape.cheekbone_height = j["features"]["cheekbone_height"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 8, current_shape.cheekbone_height);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 8, current_shape.cheekbone_height);
 	current_shape.cheekbone_width = j["features"]["cheekbone_width"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 9, current_shape.cheekbone_width);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 9, current_shape.cheekbone_width);
 	current_shape.cheeks_width = j["features"]["cheeks_width"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 10, current_shape.cheeks_width);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 10, current_shape.cheeks_width);
 	current_shape.eyes_opening = j["features"]["eyes_opening"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 11, current_shape.eyes_opening);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 11, current_shape.eyes_opening);
 	current_shape.lips_thickness = j["features"]["lips_thickness"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 12, current_shape.lips_thickness);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 12, current_shape.lips_thickness);
 	current_shape.jawbone_width = j["features"]["jawbone_width"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 13, current_shape.jawbone_width);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 13, current_shape.jawbone_width);
 	current_shape.jawbone_back_length = j["features"]["jawbone_back_length"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 14, current_shape.jawbone_back_length);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 14, current_shape.jawbone_back_length);
 	current_shape.chinbone_lowering = j["features"]["chinbone_lowering"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 15, current_shape.chinbone_lowering);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 15, current_shape.chinbone_lowering);
 	current_shape.chinbone_length = j["features"]["chinbone_length"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 16, current_shape.chinbone_length);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 16, current_shape.chinbone_length);
 	current_shape.chinbone_width = j["features"]["chinbone_width"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 17, current_shape.chinbone_width);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 17, current_shape.chinbone_width);
 	current_shape.chinbone_hole = j["features"]["chin_hole"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 18, current_shape.chinbone_hole);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 18, current_shape.chinbone_hole);
 	current_shape.neck_thickness = j["features"]["neck_thickness"];
-	PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 19, current_shape.neck_thickness);
+	PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 19, current_shape.neck_thickness);
+
 	current_character.outfit_selected_hairstyle = j["hair"]["style"];
 	current_character.outfit_selected_haircolor = j["hair"]["color"];
 	current_character.outfit_selected_highlight = j["hair"]["highlight"];
+
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
-	PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
+	PED::SET_PED_HAIR_TINT(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
 	current_shape.has_eyebrows = j["eyebrows"]["enabled"];
 
 	if (current_shape.has_eyebrows) {
 		current_shape.selected_eyebrow_type = j["eyebrows"]["type"];
 		current_shape.selected_eyebrow_color = j["eyebrows"]["color"];
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 2, current_shape.selected_eyebrow_type, 1);
-		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 2, 1, current_shape.selected_eyebrow_color, current_shape.selected_eyebrow_color);
+		PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 2, 1, current_shape.selected_eyebrow_color, current_shape.selected_eyebrow_color);
 	}
 
 	current_shape.has_beard = j["beard"]["enabled"];
@@ -322,7 +332,7 @@ void load_character(const std::string& character_name) {
 		current_shape.selected_beard_type = j["beard"]["type"];
 		current_shape.selected_beard_color = j["beard"]["color"];
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 1, current_shape.selected_beard_type, 1);
-		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 1, 1, current_shape.selected_beard_color, current_shape.selected_beard_color);
+		PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 1, 1, current_shape.selected_beard_color, current_shape.selected_beard_color);
 	}
 
 	current_shape.has_chesthair = j["chesthair"]["enabled"];
@@ -331,7 +341,7 @@ void load_character(const std::string& character_name) {
 		current_shape.selected_chesthair_type = j["chesthair"]["type"];
 		current_shape.selected_chesthair_color = j["chesthair"]["color"];
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 10, current_shape.selected_chesthair_type, 1);
-		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 10, 1, current_shape.selected_chesthair_color, current_shape.selected_chesthair_color);
+		PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 10, 1, current_shape.selected_chesthair_color, current_shape.selected_chesthair_color);
 	}
 
 	current_character.outfit_has_blush = j["blush"]["enabled"];
@@ -341,7 +351,7 @@ void load_character(const std::string& character_name) {
 		current_character.outfit_selected_blush_color = j["blush"]["color"];
 		current_character.outfit_selected_blush_opacity = j["blush"]["opacity"];
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, current_character.outfit_selected_blush_type, current_character.outfit_selected_blush_opacity);
-		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
+		PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
 	}
 
 	current_character.outfit_has_lipstick = j["lipstick"]["enabled"];
@@ -351,7 +361,7 @@ void load_character(const std::string& character_name) {
 		current_character.outfit_selected_lipstick_color = j["lipstick"]["color"];
 		current_character.outfit_selected_lipstick_opacity = j["lipstick"]["opacity"];
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, current_character.outfit_selected_lipstick_type, current_character.outfit_selected_lipstick_opacity);
-		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
+		PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
 	}
 
 	current_shape.has_blemish = j["blemish"]["enabled"];
@@ -375,7 +385,7 @@ void load_character(const std::string& character_name) {
 		current_character.outfit_selected_makeup_color = j["makeup"]["color"];
 		current_character.outfit_selected_makeup_opacity = j["makeup"]["opacity"];
 		PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, current_character.outfit_selected_makeup_type, current_character.outfit_selected_makeup_opacity);
-		PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
+		PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
 	}
 
 	current_shape.has_complexion = j["complexion"]["enabled"];

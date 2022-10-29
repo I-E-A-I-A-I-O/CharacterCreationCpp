@@ -1,8 +1,10 @@
 #include "pch.h"
+
 #include "characterCreationMenu.h"
-#include "natives.h"
+
+#include "natives.hpp"
 #include "utils.h"
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 #include "mainScript.h"
 #include "screen.h"
 #include "characterData.h"
@@ -332,12 +334,12 @@ void facecam_start(bool offset)
 		cam_offset.y = -1.6f;
 
 	cam_offset.y = 0.5f;
-	Vector3 bone_coords = PED::GET_PED_BONE_COORDS(GlobalData::PLAYER_ID, eBone::SKEL_Head, cam_offset);
+	Vector3 bone_coords = PED::GET_PED_BONE_COORDS(GlobalData::PLAYER_ID, eBone::SKEL_Head, cam_offset.x, cam_offset.y, cam_offset.z);
 	Vector3 cam_look_coords = Vector3();
 	MISC::GET_MODEL_DIMENSIONS(player_model, &dimensions, &ignore);
 	dimensions.x = 0;
 	dimensions.z = 0;
-	Vector3 rear_position = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(GlobalData::PLAYER_ID, dimensions);
+	Vector3 rear_position = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(GlobalData::PLAYER_ID, dimensions.x, dimensions.y, dimensions.z);
 	cam_look_coords.x = rear_position.x;
 	cam_look_coords.y = rear_position.y;
 
@@ -345,8 +347,8 @@ void facecam_start(bool offset)
 		cam_look_coords.y -= 0.4f;
 
 	cam_look_coords.z = rear_position.z + 0.7f;
-	CAM::SET_CAM_COORD(face_camera, bone_coords);
-	CAM::POINT_CAM_AT_COORD(face_camera, cam_look_coords);
+	CAM::SET_CAM_COORD(face_camera, bone_coords.x, bone_coords.y, bone_coords.z);
+	CAM::POINT_CAM_AT_COORD(face_camera, cam_look_coords.x, cam_look_coords.y, cam_look_coords.z);
 	CAM::SET_CAM_ACTIVE(face_camera, true);
 	CAM::RENDER_SCRIPT_CAMS(1, 1, 1000, 1, 0, 0);
 }
@@ -361,7 +363,7 @@ void facecam_end()
 
 void set_hair_values() {
 	max_hairstyles = PED::GET_NUMBER_OF_PED_DRAWABLE_VARIATIONS(GlobalData::PLAYER_ID, 2);
-	max_haircolors = PED::GET_NUM_HAIR_COLORS_();
+	max_haircolors = PED::GET_NUM_PED_HAIR_TINTS();
 }
 
 void update_mainmenu() {
@@ -385,121 +387,121 @@ void update_shapemenu() {
 
 	if (menu.FloatOption("Nose width", current_shape.nose_width, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 0, current_shape.nose_width);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 0, current_shape.nose_width);
 		}
 	}
 
 	if (menu.FloatOption("Nose peak height", current_shape.nose_peak_height, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 1, current_shape.nose_peak_height);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 1, current_shape.nose_peak_height);
 		}
 	}
 
 	if (menu.FloatOption("Nose peak length", current_shape.nose_peak_length, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 2, current_shape.nose_peak_length);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 2, current_shape.nose_peak_length);
 		}
 	}
 
 	if (menu.FloatOption("Nose bone height", current_shape.nose_bone_height, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 3, current_shape.nose_bone_height);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 3, current_shape.nose_bone_height);
 		}
 	}
 
 	if (menu.FloatOption("Nose peak lowering", current_shape.nose_peak_lowering, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 4, current_shape.nose_peak_lowering);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 4, current_shape.nose_peak_lowering);
 		}
 	}
 
 	if (menu.FloatOption("Nose bone twist", current_shape.nose_bone_twist, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 5, current_shape.nose_bone_twist);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 5, current_shape.nose_bone_twist);
 		}
 	}
 
 	if (menu.FloatOption("Eyebrow height", current_shape.eyebrow_height, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 6, current_shape.eyebrow_height);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 6, current_shape.eyebrow_height);
 		}
 	}
 
 	if (menu.FloatOption("Eyebrow forward", current_shape.eyebrow_forward, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 7, current_shape.eyebrow_forward);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 7, current_shape.eyebrow_forward);
 		}
 	}
 
 	if (menu.FloatOption("Cheekbone height", current_shape.cheekbone_height, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 8, current_shape.cheekbone_height);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 8, current_shape.cheekbone_height);
 		}
 	}
 
 	if (menu.FloatOption("Cheekbone width", current_shape.cheekbone_width, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 9, current_shape.cheekbone_width);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 9, current_shape.cheekbone_width);
 		}
 	}
 
 	if (menu.FloatOption("Cheeks width", current_shape.cheeks_width, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 10, current_shape.cheeks_width);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 10, current_shape.cheeks_width);
 		}
 	}
 
 	if (menu.FloatOption("Eye opening", current_shape.eyes_opening, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 11, current_shape.eyes_opening);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 11, current_shape.eyes_opening);
 		}
 	}
 
 	if (menu.FloatOption("Lip thickness", current_shape.lips_thickness, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 12, current_shape.lips_thickness);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 12, current_shape.lips_thickness);
 		}
 	}
 
 	if (menu.FloatOption("Jawbone width", current_shape.jawbone_width, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 13, current_shape.jawbone_width);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 13, current_shape.jawbone_width);
 		}
 	}
 
 	if (menu.FloatOption("Jawbone back length", current_shape.jawbone_back_length, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 14, current_shape.jawbone_back_length);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 14, current_shape.jawbone_back_length);
 		}
 	}
 
 	if (menu.FloatOption("Chinbone lowering", current_shape.chinbone_lowering, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 15, current_shape.chinbone_lowering);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 15, current_shape.chinbone_lowering);
 		}
 	}
 
 	if (menu.FloatOption("Chinbone length", current_shape.chinbone_length, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 16, current_shape.chinbone_length);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 16, current_shape.chinbone_length);
 		}
 	}
 
 	if (menu.FloatOption("Chinbone width", current_shape.chinbone_width, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 17, current_shape.chinbone_width);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 17, current_shape.chinbone_width);
 		}
 	}
 
 	if (menu.FloatOption("Chin hole", current_shape.chinbone_hole, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 18, current_shape.chinbone_hole);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 18, current_shape.chinbone_hole);
 		}
 	}
 
 	if (menu.FloatOption("Neck thickness", current_shape.neck_thickness, -1.0f, 1.0f)) {
 		if (CHARACTERMENU::Data::creating) {
-			PED::SET_PED_MICRO_MORPH_VALUE_(GlobalData::PLAYER_ID, 19, current_shape.neck_thickness);
+			PED::SET_PED_MICRO_MORPH(GlobalData::PLAYER_ID, 19, current_shape.neck_thickness);
 		}
 	}
 }
@@ -511,21 +513,21 @@ void update_hairmenu() {
 	if (menu.IntOption("Hairstyle", current_character.outfit_selected_hairstyle, 0, max_hairstyles)) {
 		if (CHARACTERMENU::Data::creating) {
 			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
-			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
+			PED::SET_PED_HAIR_TINT(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
 		}
 	}
 
 	if (menu.IntOption("Hair color", current_character.outfit_selected_haircolor, 0, max_haircolors)) {
 		if (CHARACTERMENU::Data::creating) {
 			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
-			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
+			PED::SET_PED_HAIR_TINT(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
 		}
 	}
 
 	if (menu.IntOption("Hightlight color", current_character.outfit_selected_highlight, 0, max_haircolors)) {
 		if (CHARACTERMENU::Data::creating) {
 			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
-			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
+			PED::SET_PED_HAIR_TINT(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
 		}
 	}
 }
@@ -546,7 +548,7 @@ void update_eyebrowmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_shape.has_eyebrows = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 2, current_shape.selected_eyebrow_type, 1);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 2, 1, current_shape.selected_eyebrow_color, current_shape.selected_eyebrow_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 2, 1, current_shape.selected_eyebrow_color, current_shape.selected_eyebrow_color);
 		}
 	}
 
@@ -554,7 +556,7 @@ void update_eyebrowmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_shape.has_eyebrows = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 2, current_shape.selected_eyebrow_type, 1);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 2, 1, current_shape.selected_eyebrow_color, current_shape.selected_eyebrow_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 2, 1, current_shape.selected_eyebrow_color, current_shape.selected_eyebrow_color);
 		}
 	}
 }
@@ -575,7 +577,7 @@ void update_beardmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_shape.has_beard = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 1, current_shape.selected_beard_type, 1);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 1, 1, current_shape.selected_beard_color, current_shape.selected_beard_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 1, 1, current_shape.selected_beard_color, current_shape.selected_beard_color);
 		}
 	}
 
@@ -583,7 +585,7 @@ void update_beardmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_shape.has_beard = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 1, current_shape.selected_beard_type, 1);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 1, 1, current_shape.selected_beard_color, current_shape.selected_beard_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 1, 1, current_shape.selected_beard_color, current_shape.selected_beard_color);
 		}
 	}
 }
@@ -604,7 +606,7 @@ void update_chestmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_shape.has_chesthair = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 10, current_shape.selected_chesthair_type, 1);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 10, 1, current_shape.selected_chesthair_color, current_shape.selected_chesthair_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 10, 1, current_shape.selected_chesthair_color, current_shape.selected_chesthair_color);
 		}
 	}
 
@@ -612,7 +614,7 @@ void update_chestmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_shape.has_chesthair = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 10, current_shape.selected_chesthair_type, 1);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 10, 1, current_shape.selected_chesthair_color, current_shape.selected_chesthair_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 10, 1, current_shape.selected_chesthair_color, current_shape.selected_chesthair_color);
 		}
 	}
 }
@@ -633,7 +635,7 @@ void update_blushmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_character.outfit_has_blush = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, current_character.outfit_selected_blush_type, current_character.outfit_selected_blush_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
 		}
 	}
 
@@ -641,7 +643,7 @@ void update_blushmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_character.outfit_has_blush = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, current_character.outfit_selected_blush_type, current_character.outfit_selected_blush_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
 		}
 	}
 
@@ -649,7 +651,7 @@ void update_blushmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_character.outfit_has_blush = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 5, current_character.outfit_selected_blush_type, current_character.outfit_selected_blush_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 5, 2, current_character.outfit_selected_blush_color, current_character.outfit_selected_blush_color);
 		}
 	}
 }
@@ -670,7 +672,7 @@ void update_lipstickmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_character.outfit_has_lipstick = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, current_character.outfit_selected_lipstick_type, current_character.outfit_selected_lipstick_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
 		}
 	}
 
@@ -678,7 +680,7 @@ void update_lipstickmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_character.outfit_has_lipstick = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, current_character.outfit_selected_lipstick_type, current_character.outfit_selected_lipstick_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
 		}
 	}
 
@@ -686,7 +688,7 @@ void update_lipstickmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_character.outfit_has_lipstick = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 8, current_character.outfit_selected_lipstick_type, current_character.outfit_selected_lipstick_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 8, 2, current_character.outfit_selected_lipstick_color, current_character.outfit_selected_lipstick_color);
 		}
 	}
 }
@@ -747,7 +749,7 @@ void update_makeupmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_character.outfit_has_makeup = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, current_character.outfit_selected_makeup_type, current_character.outfit_selected_makeup_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
 
 		}
 	}
@@ -756,7 +758,7 @@ void update_makeupmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_character.outfit_has_makeup = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, current_character.outfit_selected_makeup_type, current_character.outfit_selected_makeup_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
 
 		}
 	}
@@ -765,7 +767,7 @@ void update_makeupmenu() {
 		if (CHARACTERMENU::Data::creating) {
 			current_character.outfit_has_makeup = true;
 			PED::SET_PED_HEAD_OVERLAY(GlobalData::PLAYER_ID, 4, current_character.outfit_selected_makeup_type, current_character.outfit_selected_makeup_opacity);
-			PED::SET_PED_HEAD_OVERLAY_COLOR_(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
+			PED::SET_PED_HEAD_OVERLAY_TINT(GlobalData::PLAYER_ID, 4, 2, current_character.outfit_selected_makeup_color, current_character.outfit_selected_makeup_color);
 
 		}
 	}
@@ -971,7 +973,7 @@ void update_customization() {
 			}
 
 			PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
-			PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
+			PED::SET_PED_HAIR_TINT(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
 			tattoo_lock_out = true;
 			tattoo_lock_in = false;
 		}
@@ -982,7 +984,7 @@ void restore_outfit() {
 	if (tattoo_lock_in) return;
 
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 2, current_character.outfit_selected_hairstyle, 0, 0);
-	PED::SET_PED_HAIR_COLOR_(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
+	PED::SET_PED_HAIR_TINT(GlobalData::PLAYER_ID, current_character.outfit_selected_haircolor, current_character.outfit_selected_highlight);
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 1, current_character.mask_drawable, current_character.mask_texture, 0);
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 4, current_character.leg_drawable, current_character.leg_texture, 0);
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 5, current_character.bag_drawable, current_character.bag_texture, 0);
@@ -992,7 +994,7 @@ void restore_outfit() {
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 9, current_character.armor_drawable, current_character.armor_texture, 0);
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 11, current_character.torso2_drawable, current_character.torso2_texture, 0);
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 3, current_character.torso_drawable, 0, 0);
-	PED::SET_PED_EYE_COLOR_(GlobalData::PLAYER_ID, current_character.eye_color);
+	PED::SET_HEAD_BLEND_EYE_COLOR(GlobalData::PLAYER_ID, current_character.eye_color);
 	PED::SET_PED_COMPONENT_VARIATION(GlobalData::PLAYER_ID, 10, current_character.badge_drawable, 0, 0);
 
 	if (current_character.has_hat) {

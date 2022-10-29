@@ -60,9 +60,6 @@
     <ClInclude Include="Scaleform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SimpleIni.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="loadingMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>

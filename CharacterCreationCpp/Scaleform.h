@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <variant>
-#include <natives.h>
+#include <natives.hpp>
 #include <variant>
 
 class ScaleformArgumentTXD {

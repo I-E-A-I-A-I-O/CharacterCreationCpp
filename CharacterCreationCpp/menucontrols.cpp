@@ -2,7 +2,7 @@
 #include "menucontrols.h"
 
 #include <enums.h>
-#include <natives.h>
+#include <natives.hpp>
 
 #include "menukeyboard.h"
 
@@ -13,12 +13,12 @@ namespace NativeMenu {
     , controlPrev{}
     , pressTime{}
     , releaseTime{} {
-    std::fill(controlPrev, std::end(controlPrev), false);
-    std::fill(controlCurr, std::end(controlCurr), false);
-    std::fill(ControlKeys, std::end(ControlKeys), -1);
-}
+        std::fill(controlPrev, std::end(controlPrev), false);
+        std::fill(controlCurr, std::end(controlCurr), false);
+        std::fill(ControlKeys, std::end(ControlKeys), -1);
+    }
 
-bool MenuControls::IsKeyPressed(ControlType control) {
+    bool MenuControls::IsKeyPressed(ControlType control) {
         return IsKeyDown(ControlKeys[control]);
     }
 
